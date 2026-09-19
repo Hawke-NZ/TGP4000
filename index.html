@@ -1,0 +1,1651 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Total Garden Planner 4000</title>
+<meta name="description" content="A weather-aware vegetable garden planner for New Zealand: what to plant, when, how much, and where — adjusted for your local climate, the seasonal outlook and the forecast.">
+<meta name="theme-color" content="#1c6b54">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Garden Planner">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --font-body:'Figtree','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --bg:#f1f4ee; --surface:#ffffff; --surface-2:#e8eee4; --ink:#14201a; --ink-2:#465a4f; --ink-3:#6f8076; --line:#d3dcd0; --line-2:#e3e9e0;
+  --accent:#1c6b54; --accent-ink:#ffffff; --accent-soft:#d5eadf; --kowhai:#e6b30d; --bed:#dde5d8;
+  --good:#0c8a0c; --warn-c:#9a5b00; --warn-bg:#fff2d6; --crit:#c73535; --crit-bg:#fde4e2;
+  --g1:#2a78d6; --g2:#eb6834; --g3:#1baf7a; --g4:#eda100; --g5:#e87ba4; --g6:#008300; --g7:#4a3aa7; --g8:#e34948;
+  --shadow:0 1px 2px rgba(20,32,26,.06),0 6px 20px rgba(20,32,26,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1611; --surface:#161f19; --surface-2:#1d2a21; --ink:#e8efe9; --ink-2:#a9b8ad; --ink-3:#7f9186; --line:#2b3a2f; --line-2:#22302a;
+    --accent:#4fc3a0; --accent-ink:#06251c; --accent-soft:#173629; --kowhai:#f0c020; --bed:#1e2b22;
+    --good:#41c341; --warn-c:#f2b84b; --warn-bg:#33270d; --crit:#ef6b6b; --crit-bg:#3a1c1c;
+    --g1:#3987e5; --g2:#d95926; --g3:#199e70; --g4:#c98500; --g5:#d55181; --g6:#008300; --g7:#9085e9; --g8:#e66767;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1611; --surface:#161f19; --surface-2:#1d2a21; --ink:#e8efe9; --ink-2:#a9b8ad; --ink-3:#7f9186; --line:#2b3a2f; --line-2:#22302a;
+  --accent:#4fc3a0; --accent-ink:#06251c; --accent-soft:#173629; --kowhai:#f0c020; --bed:#1e2b22;
+  --good:#41c341; --warn-c:#f2b84b; --warn-bg:#33270d; --crit:#ef6b6b; --crit-bg:#3a1c1c;
+  --g1:#3987e5; --g2:#d95926; --g3:#199e70; --g4:#c98500; --g5:#d55181; --g6:#008300; --g7:#9085e9; --g8:#e66767;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--font-body);font-variant-numeric:tabular-nums;padding:0 16px 48px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:1.55rem;line-height:1.15} h3{font-size:1.05rem} h4{font-size:.9rem}
+p{margin:.35em 0}
+a{color:var(--accent)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.muted{color:var(--ink-2)} small,.hint{color:var(--ink-3);font-size:.82rem}
+em{font-style:normal;color:var(--ink-3)}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:0 0 .25rem}
+.sw{display:inline-block;width:.7rem;height:.7rem;border-radius:3px;margin-right:.45rem;flex:none;vertical-align:-1px}
+
+/* header */
+.top{max-width:1240px;margin:0 auto;padding:18px 0 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand svg{width:40px;height:40px;flex:none}
+.brand h1{font-size:1.45rem;line-height:1}
+.brand p{margin:.2rem 0 0;color:var(--ink-2);font-size:.85rem}
+.top .sp{flex:1}
+.datechip{font-size:.82rem;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;background:var(--surface)}
+.themebtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem .8rem;font-size:.82rem;cursor:pointer;color:var(--ink-2)}
+
+/* shell */
+.app{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+@media (min-width:980px){ .app{grid-template-columns:310px minmax(0,1fr);gap:32px;align-items:start} .sidewrap{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:6px} .sidewrap>summary{display:none} }
+.sidewrap>summary{cursor:pointer;font-family:var(--font-display);font-weight:700;padding:.7rem 1rem;border:1px solid var(--line);border-radius:10px;background:var(--surface);list-style:none}
+.sidewrap>summary::-webkit-details-marker{display:none}
+.sidewrap[open]>summary{margin-bottom:10px}
+.panel{padding:14px 0 16px;border-top:1px solid var(--line)}
+.panel:first-child{border-top:0}
+.panel h3{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-family:var(--font-body);font-weight:700;margin-bottom:.4rem}
+.fld{display:block;font-size:.83rem;font-weight:600;color:var(--ink-2);margin:.7rem 0 .25rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+input[type=number],input[type=search],input[type=date],select{width:100%;min-height:38px;padding:.4rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:.95rem}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.scale{display:flex;justify-content:space-between;font-size:.72rem;color:var(--ink-3)}
+.chk{display:flex;gap:.5rem;align-items:flex-start;margin-top:.8rem;font-size:.86rem;color:var(--ink-2)}
+.chk input{margin-top:.2rem;accent-color:var(--accent)}
+.row{display:flex;gap:6px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:.6rem}
+.placeRes{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.pl{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:.4rem .6rem;cursor:pointer}
+.pl:hover{border-color:var(--accent)} .pl span{color:var(--ink-3);font-size:.82rem}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:.4rem .8rem;min-height:38px;cursor:pointer;font-weight:600;font-size:.88rem}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.ic{min-width:38px;padding:.2rem;font-size:1.1rem;line-height:1}
+.btn.x{border-color:transparent;background:transparent;color:var(--ink-3)}
+.lnk{border:0;background:none;color:var(--accent);text-decoration:underline;cursor:pointer;padding:0;font-size:inherit}
+.status{margin-top:.8rem;font-size:.82rem}
+.status summary{cursor:pointer;color:var(--ink-2);font-weight:600}
+.status ul{list-style:none;padding:0;margin:.5rem 0}
+.status li{display:flex;gap:.5rem;align-items:flex-start;margin:.35rem 0;color:var(--ink-2)}
+.dot{width:.6rem;height:.6rem;border-radius:50%;margin-top:.4rem;flex:none;background:var(--ink-3)}
+.dot.ok{background:var(--good)} .dot.load{background:var(--kowhai)} .dot.err{background:var(--crit)}
+
+/* main column */
+.main{display:flex;flex-direction:column;gap:30px;min-width:0}
+.brief{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:18px}
+.brief-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lede{font-size:1.02rem;color:var(--ink-2);max-width:60ch}
+.pills{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}
+.pill{font-size:.76rem;font-weight:600;border:1px solid var(--line);color:var(--ink-3);border-radius:999px;padding:.2rem .65rem;white-space:nowrap}
+.pill.on{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.alert{background:var(--warn-bg);color:var(--warn-c);border-radius:10px;padding:.7rem .9rem;font-size:.92rem}
+.warn{color:var(--warn-c);font-size:.88rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat{padding:12px 14px 12px 0;display:flex;flex-direction:column;gap:2px}
+.stat+.stat{padding-left:14px;border-left:1px solid var(--line-2)}
+.stat .k{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.stat .v{font-family:var(--font-display);font-weight:700;font-size:1.45rem;line-height:1.15}
+.stat .s{font-size:.8rem;color:var(--ink-2)}
+@media (max-width:640px){ .stat+.stat{border-left:0;padding-left:0} .stats{grid-template-columns:1fr 1fr} .stat{padding:10px 8px 10px 0} }
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--ink-2);margin-bottom:6px}
+.legend .ln{display:inline-block;width:22px;height:0;border-top:3px solid var(--accent);vertical-align:middle;margin-right:6px;border-radius:2px}
+.legend .ln.nor{border-top:2px dashed var(--ink-3)} .legend .ln.thr{border-top:2px dotted var(--kowhai)}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;touch-action:pan-y}
+.pl{}
+svg .pl{fill:none} svg .gl{stroke:var(--line-2);stroke-width:1} svg .ax{fill:var(--ink-3);font:11px var(--font-body)}
+svg .adj{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linejoin:round} svg .nor{fill:none;stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:5 4}
+svg .band{fill:var(--accent);opacity:.14} svg .thr{stroke:var(--kowhai);stroke-width:1.5;stroke-dasharray:2 3}
+svg .cx{stroke:var(--ink-2);stroke-width:1} svg .cda{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.78rem;line-height:1.45;padding:.4rem .6rem;border-radius:8px;min-width:112px}
+.tip .d{color:var(--kowhai);font-weight:700}
+details.tbl{margin-top:6px} details.tbl summary{cursor:pointer;font-size:.82rem;color:var(--ink-2)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wd{display:flex;flex-direction:column;align-items:center;padding:8px 2px;border:1px solid var(--line-2);border-radius:10px;font-size:.8rem;gap:1px}
+.wd .dn{font-weight:600;color:var(--ink-2)} .wd .hi{font-family:var(--font-display);font-weight:700;font-size:1.05rem} .wd .lo{color:var(--ink-3)} .wd .rn{font-size:.72rem;color:var(--ink-3)}
+.wd.cold{background:var(--warn-bg);border-color:transparent} .wd.cold .lo{color:var(--warn-c);font-weight:700}
+.shifts h3{margin-bottom:.4rem}
+.shiftlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.shiftlist li{display:flex;gap:.2rem;align-items:baseline;font-size:.92rem;color:var(--ink-2)}
+.shiftlist li.good b{color:var(--ink)}
+.src{font-size:.8rem;color:var(--ink-3);margin:.2rem 0}
+
+.sec-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.acts{display:flex;gap:8px}
+.picker{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px 26px;margin-top:10px}
+.cg h4{display:flex;align-items:center;color:var(--ink-2);margin-bottom:.4rem;font-family:var(--font-body);font-size:.78rem;text-transform:uppercase;letter-spacing:.07em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.32rem .8rem;cursor:pointer;display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1.2;text-align:left}
+.chip.sm{padding:.25rem .65rem;font-size:.82rem;flex-direction:row}
+.chip span{font-weight:600;font-size:.9rem} .chip small{font-size:.7rem}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent)}
+.chip.k-no{border-style:dashed;color:var(--ink-3)} .chip.k-cover small,.chip.k-hold small{color:var(--warn-c);font-weight:600} .chip.k-now small{color:var(--good);font-weight:600}
+.yc-h{margin-top:22px}
+.ycs{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:6px}
+.yc{display:grid;grid-template-columns:minmax(120px,1.3fr) auto minmax(110px,1fr) minmax(90px,.7fr) auto;gap:8px 12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-2)}
+.yc .nm{display:flex;align-items:center;font-weight:600}
+.stp{display:inline-flex;gap:4px;align-items:center} .stp input{width:64px;text-align:center}
+.yc .meta{font-size:.82rem;color:var(--ink-3)} .yc .rd{font-size:.82rem;color:var(--ink-2)} .yc .rd.no{color:var(--crit);font-weight:600}
+@media (max-width:640px){ .yc{grid-template-columns:1fr auto auto;} .yc .meta{grid-column:1 / 3} .yc .rd{grid-column:1 / 3} .yc .x{grid-row:1;grid-column:3} .yc .stp{grid-column:2;grid-row:1} }
+.fit{margin-top:12px;font-size:.9rem;color:var(--ink-2)} .fit.bad{background:var(--crit-bg);border-radius:10px;padding:.6rem .8rem;color:var(--ink)}
+
+/* results */
+.results{min-width:0}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{border:0;background:none;padding:.7rem 1rem;cursor:pointer;font-weight:600;color:var(--ink-3);border-bottom:3px solid transparent;white-space:nowrap;font-size:.95rem}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tabbody{padding-top:18px;display:flex;flex-direction:column;gap:18px}
+.empty{padding:24px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--ink-2)}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.agenda{list-style:none;margin:.5rem 0 0;padding:0}
+.agenda li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:.92rem}
+.agenda li.done .tx{text-decoration:line-through;color:var(--ink-3)}
+.agenda .dt{width:5.6rem;color:var(--ink-3);font-size:.82rem;font-weight:600}
+.agenda .nb{width:16px}
+.agenda input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
+.agenda .tx{display:flex;align-items:center}
+.tag{font-size:.72rem;font-weight:600;background:var(--surface-2);color:var(--ink-2);border-radius:999px;padding:.1rem .55rem}
+.tag.warn{background:var(--warn-bg);color:var(--warn-c)}
+.legendbox .lg{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--ink-2);margin:.3rem 0}
+.key{display:inline-block;width:28px;height:12px;border-radius:3px;--c:var(--ink-3)}
+.key.nur{border:1.5px dashed var(--c)} .key.grow{background:color-mix(in srgb,var(--c) 38%,transparent)} .key.harv{background:var(--c)}
+.key.caution{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.6) 0 3px,transparent 3px 6px)}
+.key.noroom{border:1.5px dashed var(--crit);opacity:.6}
+.gantt-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.gantt{--lab:136px;position:relative;min-width:840px}
+.gh,.gr{display:grid;grid-template-columns:var(--lab) 1fr}
+.gr{border-top:1px solid var(--line-2)}
+.gl2{position:sticky;left:0;z-index:4;background:var(--surface);padding:6px 8px 6px 12px;display:flex;align-items:flex-start;font-size:.86rem;font-weight:600;line-height:1.25}
+.gl2 small{display:block;font-weight:500}
+.gt{position:relative}
+.gt.hd{height:30px}
+.mh{position:absolute;top:0;padding:7px 0 0 6px;font-size:.74rem;font-weight:600;color:var(--ink-3);white-space:nowrap;overflow:hidden}
+.ggrid{position:absolute;left:var(--lab);right:0;top:0;bottom:0;pointer-events:none;z-index:1}
+.gd{position:absolute;top:0;bottom:0;border-left:1px solid var(--line-2)}
+.today{position:absolute;top:0;bottom:0;left:calc(var(--lab) + (100% - var(--lab)) * var(--td) / 100);border-left:2px solid var(--kowhai);z-index:3;pointer-events:none}
+.today span{position:absolute;top:30px;left:4px;font-size:.68rem;font-weight:700;background:var(--kowhai);color:#14201a;border-radius:4px;padding:0 4px}
+.bar{position:absolute;height:14px;display:flex;border:0;padding:0;background:none;cursor:pointer;border-radius:4px;overflow:hidden;z-index:2}
+.bar .s{height:100%;flex:none}
+.bar .nur{border:1.5px dashed var(--c);border-right:0;background:transparent;border-radius:4px 0 0 4px}
+.bar .grow{background:color-mix(in srgb,var(--c) 38%,transparent)}
+.bar .harv{background:var(--c)}
+.bar.caution .harv{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.6) 0 3px,transparent 3px 6px)}
+.bar.noroom{opacity:.45;outline:1.5px dashed var(--crit)}
+.bar.sel{outline:2px solid var(--ink);outline-offset:1px}
+.bar:hover{filter:brightness(1.08)}
+.detail{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--surface)}
+.dh{display:flex;align-items:center;justify-content:space-between}.dh h3{display:flex;align-items:center;font-size:1.2rem}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 24px;margin:.8rem 0}
+.dl dt{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600} .dl dd{margin:0}
+.notes{margin:.4rem 0;padding-left:1.1rem;color:var(--ink-2)} .notes li{margin:.25rem 0}
+.log{margin-top:.6rem;max-width:260px}
+.pickhint{font-size:.88rem}
+
+/* layout tab */
+.viewer{max-width:560px}
+.bedsvg svg{width:100%;height:auto;display:block;max-height:520px}
+svg .bed{fill:var(--bed);stroke:var(--line)} svg .seg{stroke:var(--surface);stroke-width:2}
+svg .segt{font:600 13px var(--font-body);fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.4);stroke-width:2.5px;pointer-events:none}
+.lgd{list-style:none;padding:0;margin:.4rem 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 20px}
+.lgd li{display:flex;align-items:center;gap:0;font-size:.88rem} .lgd em{margin-left:auto;padding-left:10px}
+.util svg{width:100%;height:auto;display:block} svg .ub{fill:var(--accent);opacity:.75}
+.fill h3{margin-bottom:.2rem}
+.fl{list-style:none;padding:0;margin:.5rem 0}
+.fl li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-2)}
+.fl .fn{flex:1;font-size:.9rem;color:var(--ink-2)} .fl .fn b{color:var(--ink)}
+
+/* shopping + tracker */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tile{display:flex;flex-direction:column;padding:12px 14px} .tile+.tile{border-left:1px solid var(--line-2)}
+.tile .k{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600} .tile .v{font-family:var(--font-display);font-weight:700;font-size:1.35rem} .tile .s{font-size:.8rem;color:var(--ink-2)}
+@media (max-width:640px){.tile+.tile{border-left:0;border-top:1px solid var(--line-2)}}
+.scrollx{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:.9rem}
+.t th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:.5rem .6rem;border-bottom:1px solid var(--line)}
+.t td{padding:.55rem .6rem;border-bottom:1px solid var(--line-2);vertical-align:top}
+.t .num{text-align:right;white-space:nowrap} .t td input,.t td select{min-width:130px}
+.sup{list-style:none;padding:0;margin:.3rem 0} .sup li{display:flex;justify-content:space-between;gap:12px;padding:.45rem 0;border-bottom:1px solid var(--line-2)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.prog .bar2{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden} .prog .bar2 span{display:block;height:100%;background:var(--accent)}
+footer{max-width:1240px;margin:36px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:.8rem;color:var(--ink-3)}
+
+@media print{
+  body{background:#fff;color:#000} .top .themebtn,.datechip,.sidewrap,.picker,.acts,.tabs,.actions,.brief,.yc .x,.stp,.btn{display:none!important}
+  .app{display:block} .main{gap:14px}
+}
+@media (prefers-reduced-motion:no-preference){ .bar,.chip,.btn{transition:filter .15s,border-color .15s} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="var(--accent)"/><path d="M24 40V22" stroke="var(--accent-ink)" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M24 26c-7 0-11-4-11-10 7 0 11 4 11 10z" fill="var(--accent-ink)"/><path d="M24 22c0-6 4-10 11-10 0 6-4 10-11 10z" fill="var(--kowhai)"/></svg>
+    <div><h1>Total Garden Planner 4000</h1><p>Plan around your weather, not the calendar.</p></div>
+  </div>
+  <span class="sp"></span>
+  <span class="datechip" id="today"></span>
+  <button class="themebtn" id="themeBtn" type="button" aria-label="Change colour theme">Theme: auto</button>
+</header>
+<div class="app">
+  <details class="sidewrap" id="sideWrap" open><summary id="sideSum">Your garden &amp; weather settings</summary><div id="side"></div></details>
+  <main class="main">
+    <section class="brief" id="briefing" aria-live="polite"></section>
+    <section id="crops"></section>
+    <section class="results" id="results"></section>
+  </main>
+</div>
+<footer>
+  Timing comes from a thermal-time model (growing degree-days) run over your local climate, the NIWA seasonal outlook and the live forecast — a guide, not a guarantee. Check the 7-day forecast before planting out tender seedlings.
+  Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0). Seasonal outlook from <a href="https://niwa.co.nz/climate-and-weather/seasonal-climate-outlook" target="_blank" rel="noopener">NIWA / Earth Sciences NZ</a>.
+</footer>
+<script>
+/* ============================================================
+   DATA — regions, seasonal outlook, crops
+   Everything here is the OFFLINE FALLBACK. Live data (Open-Meteo)
+   overrides climate + outlook when it loads.
+   ============================================================ */
+
+/* Groups match NIWA / Earth Sciences NZ seasonal outlook regions */
+const OUTLOOK_GROUPS = {
+  north:     { label: 'Northland, Auckland, Waikato, Bay of Plenty' },
+  central:   { label: 'Central North Island, Taranaki, Whanganui, Manawatū, Wellington' },
+  east:      { label: 'Gisborne, Hawke’s Bay, Wairarapa' },
+  nelson:    { label: 'Tasman, Nelson, Marlborough, Buller' },
+  southwest: { label: 'West Coast, Southern Alps, inland Otago, Southland' },
+  canterbury:{ label: 'Coastal Canterbury, east Otago' }
+};
+
+/* Seasonal anomaly anchors (°C vs normal) and rainfall index (-1 dry … +1 wet)
+   at mid-spring (Oct 15), mid-summer (Jan 15), mid-autumn (Apr 15), mid-winter (Jul 15).
+   Spring values are read from the NIWA Sep–Nov 2026 outlook (issued 2 Sep 2026).
+   Summer/autumn values are an El Niño-pattern assumption (NIWA: "recurring pattern of an
+   unusually dry summer in the north and east, wetter in the south and west"). */
+const OUTLOOK = {
+  updated: '2026-09-02',
+  title: 'NIWA / Earth Sciences NZ seasonal outlook, Sep–Nov 2026 (issued 2 Sep 2026)',
+  enso: 'Very strong El Niño, expected to peak Nov–Dec 2026 and fade by Apr–May 2027',
+  notes: 'Windy, changeable spring with occasional cold outbreaks despite the warm tilt. Drier than normal north and east; wetter in the south-west.',
+  groups: {
+    north:     { t: { spr: 0.5, sum: 0.6, aut: 0.3, win: 0.1 }, r: { spr: -1.0, sum: -1.0, aut: -0.5, win: 0 },
+                 blurb: 'Warmer than normal (about 50% chance above average) and drier than normal (about 50% chance below).' },
+    central:   { t: { spr: 0.3, sum: 0.3, aut: 0.2, win: 0.0 }, r: { spr: -0.6, sum: -0.6, aut: -0.3, win: 0 },
+                 blurb: 'Near or above average temperatures; rainfall near or below normal.' },
+    east:      { t: { spr: 0.5, sum: 0.7, aut: 0.3, win: 0.1 }, r: { spr: -1.0, sum: -1.0, aut: -0.5, win: 0 },
+                 blurb: 'Warmer than normal (about 50% chance above) and drier (about 50% chance below normal rainfall).' },
+    nelson:    { t: { spr: 0.2, sum: 0.4, aut: 0.2, win: 0.0 }, r: { spr: -0.5, sum: -0.7, aut: -0.3, win: 0 },
+                 blurb: 'Near or above average temperatures; rainfall below or near normal.' },
+    southwest: { t: { spr: 0.0, sum: -0.3, aut: 0.0, win: 0.0 }, r: { spr: 1.0, sum: 0.6, aut: 0.3, win: 0 },
+                 blurb: 'Near average temperatures; wetter than normal (about 60% chance above).' },
+    canterbury:{ t: { spr: 0.3, sum: 0.5, aut: 0.2, win: 0.0 }, r: { spr: -0.6, sum: -0.8, aut: -0.4, win: 0 },
+                 blurb: 'Above or near average temperatures; rainfall below or near normal.' }
+  }
+};
+
+const OUTLOOK_PRESETS = {
+  auto:    { label: 'Auto — use the latest outlook for my area' },
+  elnino:  { label: 'El Niño pattern' },
+  neutral: { label: 'Normal year (no adjustment)' },
+  lanina:  { label: 'La Niña pattern' }
+};
+const LANINA = {
+  north:     { t: { spr: 0.5, sum: 0.7, aut: 0.5, win: 0.3 }, r: { spr: 0.7, sum: 0.7, aut: 0.5, win: 0.2 } },
+  east:      { t: { spr: 0.5, sum: 0.7, aut: 0.5, win: 0.3 }, r: { spr: 0.6, sum: 0.7, aut: 0.4, win: 0.2 } },
+  central:   { t: { spr: 0.4, sum: 0.5, aut: 0.4, win: 0.2 }, r: { spr: 0.4, sum: 0.4, aut: 0.3, win: 0.1 } },
+  nelson:    { t: { spr: 0.4, sum: 0.5, aut: 0.4, win: 0.2 }, r: { spr: -0.3, sum: -0.3, aut: -0.2, win: 0 } },
+  southwest: { t: { spr: 0.2, sum: 0.3, aut: 0.2, win: 0.0 }, r: { spr: -0.3, sum: -0.3, aut: -0.2, win: 0 } },
+  canterbury:{ t: { spr: 0.3, sum: 0.4, aut: 0.3, win: 0.1 }, r: { spr: -0.3, sum: -0.3, aut: -0.2, win: 0 } }
+};
+
+/* ta = long-term annual mean air temp (°C); amp = half the Jan–Jul difference;
+   lsf / faf = typical last spring / first autumn light frost (MM-DD); ms = MetService slug.
+   Approximate long-term normals — live climate history replaces these when available. */
+const REGIONS = [
+  { id:'kerikeri',    name:'Kerikeri / Bay of Islands', isl:'North Island', grp:'north',   lat:-35.23, lon:173.95, ta:15.6, amp:4.6, lsf:'07-25', faf:'06-15', ms:'kerikeri' },
+  { id:'whangarei',   name:'Whangārei',                 isl:'North Island', grp:'north',   lat:-35.73, lon:174.32, ta:15.7, amp:4.4, lsf:'08-05', faf:'06-10', ms:'whangarei' },
+  { id:'auckland',    name:'Auckland (city & coast)',   isl:'North Island', grp:'north',   lat:-36.85, lon:174.76, ta:15.2, amp:4.3, lsf:'08-01', faf:'06-05', ms:'auckland' },
+  { id:'pukekohe',    name:'Pukekohe / South Auckland', isl:'North Island', grp:'north',   lat:-37.20, lon:174.90, ta:14.3, amp:4.6, lsf:'09-10', faf:'05-10', ms:'pukekohe' },
+  { id:'hamilton',    name:'Hamilton',                  isl:'North Island', grp:'north',   lat:-37.79, lon:175.28, ta:14.0, amp:5.0, lsf:'09-25', faf:'05-01', ms:'hamilton' },
+  { id:'tauranga',    name:'Tauranga',                  isl:'North Island', grp:'north',   lat:-37.69, lon:176.17, ta:14.9, amp:4.5, lsf:'08-25', faf:'05-25', ms:'tauranga' },
+  { id:'whakatane',   name:'Whakatāne',                 isl:'North Island', grp:'north',   lat:-37.95, lon:177.00, ta:14.6, amp:4.6, lsf:'09-01', faf:'05-20', ms:'whakatane' },
+  { id:'rotorua',     name:'Rotorua',                   isl:'North Island', grp:'north',   lat:-38.14, lon:176.25, ta:12.8, amp:4.8, lsf:'10-15', faf:'04-20', ms:'rotorua' },
+  { id:'taupo',       name:'Taupō',                     isl:'North Island', grp:'central', lat:-38.69, lon:176.08, ta:11.6, amp:5.0, lsf:'10-28', faf:'04-10', ms:'taupo' },
+  { id:'gisborne',    name:'Gisborne',                  isl:'North Island', grp:'east',    lat:-38.66, lon:178.02, ta:14.6, amp:5.0, lsf:'09-05', faf:'05-20', ms:'gisborne' },
+  { id:'napier',      name:'Napier / Hastings',         isl:'North Island', grp:'east',    lat:-39.49, lon:176.91, ta:14.4, amp:5.1, lsf:'09-15', faf:'05-05', ms:'napier' },
+  { id:'newplymouth', name:'New Plymouth',              isl:'North Island', grp:'central', lat:-39.06, lon:174.08, ta:13.9, amp:4.2, lsf:'08-15', faf:'06-01', ms:'new-plymouth' },
+  { id:'whanganui',   name:'Whanganui',                 isl:'North Island', grp:'central', lat:-39.93, lon:175.05, ta:14.0, amp:4.5, lsf:'08-30', faf:'05-25', ms:'whanganui' },
+  { id:'palmerston',  name:'Palmerston North',          isl:'North Island', grp:'central', lat:-40.36, lon:175.61, ta:12.8, amp:4.8, lsf:'09-20', faf:'05-05', ms:'palmerston-north' },
+  { id:'masterton',   name:'Masterton / Wairarapa',     isl:'North Island', grp:'east',    lat:-40.95, lon:175.66, ta:12.2, amp:5.3, lsf:'10-05', faf:'04-25', ms:'masterton' },
+  { id:'wellington',  name:'Wellington',                isl:'North Island', grp:'central', lat:-41.29, lon:174.78, ta:12.8, amp:4.3, lsf:'08-20', faf:'06-05', ms:'wellington' },
+  { id:'nelson',      name:'Nelson',                    isl:'South Island', grp:'nelson',  lat:-41.27, lon:173.28, ta:12.7, amp:5.0, lsf:'09-15', faf:'05-10', ms:'nelson' },
+  { id:'blenheim',    name:'Blenheim / Marlborough',    isl:'South Island', grp:'nelson',  lat:-41.51, lon:173.96, ta:13.0, amp:5.5, lsf:'09-25', faf:'05-01', ms:'blenheim' },
+  { id:'greymouth',   name:'Greymouth / West Coast',    isl:'South Island', grp:'southwest', lat:-42.45, lon:171.21, ta:11.4, amp:4.2, lsf:'09-05', faf:'05-15', ms:'greymouth' },
+  { id:'christchurch',name:'Christchurch',              isl:'South Island', grp:'canterbury', lat:-43.53, lon:172.64, ta:11.7, amp:5.4, lsf:'10-01', faf:'04-25', ms:'christchurch' },
+  { id:'timaru',      name:'Timaru / South Canterbury', isl:'South Island', grp:'canterbury', lat:-44.40, lon:171.25, ta:10.9, amp:4.8, lsf:'10-10', faf:'04-20', ms:'timaru' },
+  { id:'dunedin',     name:'Dunedin',                   isl:'South Island', grp:'canterbury', lat:-45.87, lon:170.50, ta:10.8, amp:4.3, lsf:'10-05', faf:'05-01', ms:'dunedin' },
+  { id:'queenstown',  name:'Queenstown / Wānaka',       isl:'South Island', grp:'southwest', lat:-45.03, lon:168.66, ta:9.8,  amp:6.2, lsf:'11-05', faf:'04-01', ms:'queenstown' },
+  { id:'alexandra',   name:'Central Otago (Alexandra, Cromwell)', isl:'South Island', grp:'southwest', lat:-45.25, lon:169.38, ta:10.4, amp:7.6, lsf:'10-25', faf:'04-10', ms:'alexandra' },
+  { id:'invercargill',name:'Invercargill / Southland',  isl:'South Island', grp:'southwest', lat:-46.41, lon:168.35, ta:9.8,  amp:4.5, lsf:'10-20', faf:'04-20', ms:'invercargill' }
+];
+
+/* Crop groups — colours come from the validated categorical palette (CSS vars --g1…--g8). */
+const GROUPS = {
+  bras:  { name:'Brassicas',       slot:1 },
+  root:  { name:'Roots & tubers',  slot:2 },
+  herb:  { name:'Herbs',           slot:3 },
+  vine:  { name:'Vines & corn',    slot:4 },
+  alli:  { name:'Alliums',         slot:5 },
+  leaf:  { name:'Leafy greens',    slot:6 },
+  legu:  { name:'Legumes',         slot:7 },
+  fruit: { name:'Fruiting',        slot:8 }
+};
+
+/* Crop model
+   warm   frost-tender, needs warm soil + must finish before autumn cools
+   tb     base temperature for growth (°C)
+   d, rt  days from in-ground date to first harvest at a reference mean temperature rt
+          → thermal time gdd = d × (rt − tb); the engine then uses the real (adjusted) temperatures
+   span   days the harvest lasts (also how long the space stays occupied)
+   minSoil  soil temp to sow/plant
+   fb     days after the last spring frost before planting out (negative = before)
+   nur    weeks raising seedlings before planting out (0 = sown direct)
+   pm     plants per m² · kg  kg harvested per plant per round
+   mode   seq = replant same space after harvest · stag = staggered sowings every `gap` days
+   max    most rounds / sowings the planner will schedule
+   months allowed planting months (1–12) · hmax  mean °C above which it bolts / sulks
+   kind   seedling | direct | tuber | clove | slip     */
+const CROPS = [
+ // ---- Fruiting
+ { id:'tomato',   n:'Tomato',            g:'fruit', warm:1, tb:10, d:75,  rt:18, span:70, minSoil:13, fb:10, nur:6, pm:3,   kg:4,    mode:'seq', max:1, def:4,  kind:'seedling', water:3, sp:'50 cm apart, staked', comp:'Basil, carrots, marigolds', avoid:'Potatoes, fennel, brassicas', tip:'Feed weekly once fruit sets; mulch to hold moisture.', pack:30 },
+ { id:'cherry',   n:'Cherry tomato',     g:'fruit', warm:1, tb:10, d:65,  rt:18, span:80, minSoil:13, fb:10, nur:6, pm:3,   kg:3,    mode:'seq', max:1, def:2,  kind:'seedling', water:3, sp:'50 cm apart, staked', comp:'Basil, carrots', avoid:'Potatoes, fennel', tip:'Earliest fruit of the tomatoes — a good first planting.', pack:30 },
+ { id:'capsicum', n:'Capsicum',          g:'fruit', warm:1, tb:12, d:85,  rt:19, span:60, minSoil:15, fb:14, nur:8, pm:4,   kg:1.2,  mode:'seq', max:1, def:3,  kind:'seedling', water:2, sp:'40 cm apart', comp:'Basil, onions', avoid:'Fennel', tip:'Needs real warmth — wait for settled weather.', pack:20 },
+ { id:'chilli',   n:'Chilli',            g:'fruit', warm:1, tb:12, d:90,  rt:19, span:70, minSoil:15, fb:14, nur:8, pm:4,   kg:0.5,  mode:'seq', max:1, def:2,  kind:'seedling', water:2, sp:'40 cm apart', comp:'Basil, tomatoes', avoid:'Fennel', tip:'Slightly stressed (a bit dry) plants are hotter.', pack:20 },
+ { id:'eggplant', n:'Eggplant',          g:'fruit', warm:1, tb:12, d:95,  rt:19, span:50, minSoil:16, fb:14, nur:8, pm:3,   kg:2,    mode:'seq', max:1, def:2,  kind:'seedling', water:2, sp:'50 cm apart', comp:'Beans, basil', avoid:'Fennel', tip:'The fussiest of the warm crops — cloche it early.', pack:20 },
+ // ---- Vines & corn
+ { id:'zucchini', n:'Zucchini',          g:'vine',  warm:1, tb:10, d:50,  rt:18, span:60, minSoil:14, fb:10, nur:3, pm:0.8, kg:6,    mode:'seq', nxt:0.5, max:2, def:2,  kind:'seedling', water:3, sp:'120 cm apart', comp:'Beans, corn, nasturtium', avoid:'Potatoes', tip:'A second planting replaces the first once mildew arrives.', pack:10 },
+ { id:'cucumber', n:'Cucumber',          g:'vine',  warm:1, tb:12, d:55,  rt:19, span:45, minSoil:15, fb:10, nur:3, pm:3,   kg:3,    mode:'seq', nxt:0.5, max:2, def:3,  kind:'seedling', water:3, sp:'30 cm apart on a trellis', comp:'Beans, corn, dill', avoid:'Potatoes, strong herbs', tip:'Trellis them to save space and cut fungal problems.', pack:15 },
+ { id:'pumpkin',  n:'Pumpkin / butternut', g:'vine', warm:1, tb:10, d:100, rt:17.5, span:30, minSoil:14, fb:10, nur:3, pm:0.4, kg:6,    mode:'seq', max:1, def:2,  kind:'seedling', water:2, sp:'150 cm apart', comp:'Corn, beans', avoid:'Potatoes', tip:'Hungry and sprawling — give it the edge of the plot.', pack:8 },
+ { id:'rockmelon',n:'Rockmelon',         g:'vine',  warm:1, tb:12, d:110, rt:20, span:25, minSoil:17, fb:14, nur:3, pm:0.6, kg:2.5,  mode:'seq', max:1, def:1,  kind:'seedling', water:2, sp:'100 cm apart', comp:'Corn', avoid:'Potatoes', tip:'Only worth it in the warmest spots (or under cover).', pack:10 },
+ { id:'corn',     n:'Sweetcorn',         g:'vine',  warm:1, tb:10, d:90,  rt:18, span:14, minSoil:13, fb:7,  nur:0, pm:6,   kg:0.35, mode:'seq', max:2, def:12, kind:'direct', sow:1.3, water:2, sp:'30 cm apart, in a block', comp:'Beans, pumpkin, cucumber', avoid:'Tomatoes', tip:'Plant in a block, not a row, so it pollinates.', pack:50 },
+ // ---- Legumes
+ { id:'dbean',    n:'Dwarf beans',       g:'legu',  warm:1, tb:10, d:60,  rt:18, span:28, minSoil:14, fb:10, nur:0, pm:16,  kg:0.15, mode:'seq', nxt:0.75, max:3, def:24, kind:'direct', sow:1.2, water:2, sp:'10 cm apart, rows 40 cm', comp:'Carrots, corn, cucumber', avoid:'Onions, garlic', tip:'Fastest summer crop — ideal for a second round.', pack:40 },
+ { id:'cbean',    n:'Climbing beans',    g:'legu',  warm:1, tb:10, d:70,  rt:18, span:45, minSoil:14, fb:10, nur:0, pm:12,  kg:0.35, mode:'seq', max:2, def:8,  kind:'direct', sow:1.3, water:2, sp:'15 cm apart up a trellis', comp:'Corn, cucumber', avoid:'Onions, garlic', tip:'Grow up a teepee or fence — tiny footprint, big crop.', pack:30 },
+ { id:'peas',     n:'Peas',              g:'legu',  warm:0, tb:4,  d:70,  rt:12, span:21, minSoil:6,  nur:0, pm:40,  kg:0.06, mode:'seq', max:2, def:40, kind:'direct', sow:1.3, water:2, hmax:15.5, sp:'5 cm apart, double row', comp:'Carrots, radish', avoid:'Onions, garlic', tip:'Cool-season: sow in autumn or early spring, not summer.', pack:80 },
+ { id:'broadbean',n:'Broad beans',       g:'legu',  warm:0, tb:3,  d:150, rt:10, span:28, minSoil:5,  nur:0, pm:12,  kg:0.25, mode:'seq', max:1, def:12, kind:'direct', sow:1.2, water:1, months:[4,5,6,7,8], sp:'20 cm apart', comp:'Potatoes, carrots', avoid:'Onions, garlic', tip:'Autumn/winter sowing; also fixes nitrogen for the next crop.', pack:30 },
+ // ---- Leafy
+ { id:'lettuce',  n:'Lettuce',           g:'leaf',  warm:0, tb:4,  d:45,  rt:14, span:21, minSoil:5,  nur:4, pm:12,  kg:0.25, mode:'stag', gap:21, max:8, def:6, kind:'seedling', water:2, hmax:19, sp:'25 cm apart', comp:'Carrots, radish, onions', avoid:'Celery', tip:'Sow a few every 3 weeks; shade cloth in hot spells.', pack:500, per:'per sowing' },
+ { id:'spinach',  n:'Spinach',           g:'leaf',  warm:0, tb:3,  d:45,  rt:12, span:30, minSoil:5,  nur:0, pm:30,  kg:0.05, mode:'stag', gap:21, max:5, def:15, kind:'direct', sow:1.5, water:2, hmax:15.5, sp:'12 cm apart', comp:'Peas, brassicas', avoid:'—', tip:'Bolts in heat — this is a cool-season crop.', pack:100, per:'per sowing' },
+ { id:'silverbeet',n:'Silverbeet',       g:'leaf',  warm:0, tb:5,  d:70,  rt:15, span:200,minSoil:8,  nur:4, pm:6,   kg:0.8,  mode:'seq', max:1, def:4,  kind:'seedling', water:2, sp:'30 cm apart', comp:'Beans, onions', avoid:'—', tip:'Pick outer leaves and it keeps going for months.', pack:50 },
+ { id:'rocket',   n:'Rocket',            g:'leaf',  warm:0, tb:4,  d:30,  rt:14, span:25, minSoil:5,  nur:0, pm:60,  kg:0.03, mode:'stag', gap:21, max:5, def:30, kind:'direct', sow:1.5, water:2, hmax:18, sp:'8 cm apart', comp:'Lettuce, beetroot', avoid:'—', tip:'Quick and peppery; goes hot and bitter in summer.', pack:500, per:'per sowing' },
+ { id:'parsley',  n:'Parsley',           g:'herb',  warm:0, tb:5,  d:75,  rt:15, span:220,minSoil:8,  nur:6, pm:9,   kg:0.4,  mode:'seq', max:1, def:3,  kind:'seedling', water:2, sp:'25 cm apart', comp:'Tomatoes, asparagus', avoid:'Lettuce', tip:'Slow to germinate — buy seedlings if you’re impatient.', pack:200 },
+ // ---- Brassicas
+ { id:'broccoli', n:'Broccoli',          g:'bras',  warm:0, tb:4,  d:75,  rt:14, span:30, minSoil:6,  nur:5, pm:3,   kg:0.5,  mode:'stag', gap:28, max:3, def:4, kind:'seedling', water:2, hmax:20, sp:'45 cm apart', comp:'Onions, beetroot, herbs', avoid:'Tomatoes, strawberries', tip:'Net against white butterfly; side shoots keep coming after the head.', pack:100, per:'per sowing' },
+ { id:'cabbage',  n:'Cabbage',           g:'bras',  warm:0, tb:4,  d:90,  rt:14, span:21, minSoil:6,  nur:5, pm:3.5, kg:1.2,  mode:'stag', gap:30, max:3, def:4, kind:'seedling', water:2, hmax:21, sp:'40 cm apart', comp:'Onions, herbs', avoid:'Tomatoes', tip:'Net against white butterfly.', pack:100, per:'per sowing' },
+ { id:'cauli',    n:'Cauliflower',       g:'bras',  warm:0, tb:4,  d:100, rt:14, span:14, minSoil:6,  nur:5, pm:3,   kg:0.8,  mode:'stag', gap:30, max:2, def:3, kind:'seedling', water:2, hmax:20, sp:'50 cm apart', comp:'Onions, beetroot', avoid:'Tomatoes', tip:'Steady water and cool weather stop it “buttoning”.', pack:100, per:'per sowing' },
+ { id:'kale',     n:'Kale',              g:'bras',  warm:0, tb:4,  d:70,  rt:14, span:150,minSoil:6,  nur:5, pm:4,   kg:0.8,  mode:'seq', max:1, def:3,  kind:'seedling', water:1, sp:'40 cm apart', comp:'Onions, beetroot', avoid:'Tomatoes', tip:'Tough, cold-hardy, and it just keeps giving.', pack:100 },
+ { id:'sprouts',  n:'Brussels sprouts',  g:'bras',  warm:0, tb:4,  d:150, rt:13, span:60, minSoil:6,  nur:6, pm:2.5, kg:0.6,  mode:'seq', max:1, def:3,  kind:'seedling', water:2, sp:'50 cm apart', comp:'Onions, herbs', avoid:'Tomatoes', tip:'Long season — plant in early summer for winter sprouts.', pack:100 },
+ { id:'bokchoy',  n:'Bok choy',          g:'bras',  warm:0, tb:4,  d:45,  rt:15, span:14, minSoil:6,  nur:0, pm:16,  kg:0.25, mode:'stag', gap:21, max:4, def:8, kind:'direct', sow:1.5, water:2, hmax:20, sp:'20 cm apart', comp:'Onions', avoid:'—', tip:'Quick in spring and autumn; bolts if it gets hot.', pack:200, per:'per sowing' },
+ // ---- Roots & tubers
+ { id:'carrot',   n:'Carrots',           g:'root',  warm:0, tb:4,  d:90,  rt:14, span:45, minSoil:7,  nur:0, pm:60,  kg:0.07, mode:'stag', gap:28, max:4, def:60, kind:'direct', sow:2.5, water:2, sp:'5 cm apart, rows 20 cm', comp:'Onions, lettuce, peas', avoid:'Dill', tip:'Keep the seedbed damp until they’re up.', pack:800, per:'per sowing' },
+ { id:'beetroot', n:'Beetroot',          g:'root',  warm:0, tb:5,  d:60,  rt:15, span:45, minSoil:8,  nur:0, pm:25,  kg:0.12, mode:'stag', gap:28, max:4, def:30, kind:'direct', sow:1.8, water:2, sp:'10 cm apart', comp:'Onions, brassicas', avoid:'Climbing beans', tip:'Each “seed” is a cluster — thin to one.', pack:100, per:'per sowing' },
+ { id:'radish',   n:'Radish',            g:'root',  warm:0, tb:4,  d:28,  rt:15, span:14, minSoil:5,  nur:0, pm:100, kg:0.02, mode:'stag', gap:14, max:6, def:60, kind:'direct', sow:1.2, water:2, hmax:21, sp:'3 cm apart', comp:'Carrots, lettuce, cucumber', avoid:'Hyssop', tip:'Ready in a month — fill any gap with them.', pack:200, per:'per sowing' },
+ { id:'parsnip',  n:'Parsnip',           g:'root',  warm:0, tb:4,  d:150, rt:12, span:60, minSoil:6,  nur:0, pm:20,  kg:0.15, mode:'seq', max:1, def:30, kind:'direct', sow:2.5, water:1, months:[8,9,10,11], sp:'10 cm apart', comp:'Onions, garlic', avoid:'Carrots', tip:'Slow to germinate — use fresh seed every year.', pack:200 },
+ { id:'potato',   n:'Potatoes',          g:'root',  warm:0, tb:7,  d:100, rt:14, span:30, minSoil:8,  fb:-21, nur:0, pm:5, kg:0.8,  mode:'seq', max:2, def:10, kind:'tuber', water:3, months:[7,8,9,10,11,12,1], sp:'30 cm apart, rows 60 cm', comp:'Beans, cabbage', avoid:'Tomatoes, pumpkin', tip:'Plant early, then a “Christmas” crop for winter harvest.', pack:1 },
+ { id:'kumara',   n:'Kumara',            g:'root',  warm:1, tb:12, d:110, rt:20, span:25, minSoil:16, fb:14, nur:0, pm:3,   kg:1.0,  mode:'seq', max:1, def:8,  kind:'slip', water:2, sp:'40 cm apart on mounds', comp:'—', avoid:'—', tip:'Needs a long warm season — best in the north or under cover.', pack:1 },
+ // ---- Alliums
+ { id:'garlic',   n:'Garlic',            g:'alli',  warm:0, tb:3,  d:190, rt:13.5, span:21, minSoil:2, nur:0, pm:25,  kg:0.05, mode:'seq', max:1, def:25, kind:'clove', water:1, months:[5,6,7], sp:'10 cm apart, rows 25 cm', comp:'Tomatoes, roses', avoid:'Beans, peas', tip:'Traditionally planted on the shortest day (21 June).', pack:1 },
+ { id:'onion',    n:'Onions (bulb)',     g:'alli',  warm:0, tb:3,  d:200, rt:13, span:30, minSoil:5,  nur:8, pm:30,  kg:0.12, mode:'seq', max:1, def:30, kind:'seedling', water:1, months:[5,6,7,8], sp:'10 cm apart, rows 25 cm', comp:'Carrots, beetroot, brassicas', avoid:'Peas, beans', tip:'Plant out winter seedlings for a summer harvest.', pack:300 },
+ { id:'springon', n:'Spring onions',     g:'alli',  warm:0, tb:4,  d:70,  rt:14, span:30, minSoil:6,  nur:0, pm:100, kg:0.02, mode:'stag', gap:28, max:5, def:60, kind:'direct', sow:1.5, water:1, sp:'3 cm apart', comp:'Carrots, lettuce', avoid:'Peas, beans', tip:'Handy little space-filler all year.', pack:300, per:'per sowing' },
+ { id:'leek',     n:'Leeks',             g:'alli',  warm:0, tb:4,  d:150, rt:13, span:60, minSoil:8,  nur:8, pm:20,  kg:0.15, mode:'seq', max:1, def:12, kind:'seedling', water:2, months:[9,10,11,12,1], sp:'15 cm apart', comp:'Carrots, celery', avoid:'Beans, peas', tip:'Plant deep into holes and let them blanch.', pack:200 },
+ // ---- Herbs
+ { id:'basil',    n:'Basil',             g:'herb',  warm:1, tb:10, d:42,  rt:18, span:90, minSoil:15, fb:14, nur:5, pm:9,   kg:0.3,  mode:'seq', nxt:0.5, max:2, def:4,  kind:'seedling', water:2, sp:'25 cm apart', comp:'Tomatoes, capsicum', avoid:'Rue', tip:'Pinch the tips to keep it bushy and stop flowering.', pack:150 },
+ { id:'coriander',n:'Coriander',         g:'herb',  warm:0, tb:4,  d:40,  rt:15, span:20, minSoil:6,  nur:0, pm:40,  kg:0.02, mode:'stag', gap:21, max:4, def:30, kind:'direct', sow:1.5, water:2, hmax:17, sp:'8 cm apart', comp:'Spinach, peas', avoid:'Fennel', tip:'Bolts quickly in heat — sow little and often.', pack:100, per:'per sowing' }
+];
+
+/* ============================================================
+   ENGINE — climate model + planting scheduler + bed packing
+   Pure functions, no DOM. Works in browser and node (tests).
+   ============================================================ */
+const DAY = 86400000;
+const OFF = 120;            // timeline starts 120 days before "today" (so past plantings can be entered)
+const NDAYS = OFF + 620;    // …and runs ~20 months ahead
+const CROP_BY_ID = {}; CROPS.forEach(c => CROP_BY_ID[c.id] = c);
+
+const PROTECTION = {
+  none:   { label: 'Open ground',            pa: 0,   ps: 0,   shift: 0  },
+  cloche: { label: 'Cloches / tunnel house', pa: 1.5, ps: 1.5, shift: 14 },
+  glass:  { label: 'Greenhouse',             pa: 4,   ps: 3,   shift: 35 }
+};
+
+function utcMidnight(d){ return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()); }
+function doyOfMs(ms){ const d = new Date(ms); return Math.round((ms - Date.UTC(d.getUTCFullYear(),0,0)) / DAY); }
+function mmddToDoy(s){ const [m,d] = s.split('-').map(Number); return Math.round((Date.UTC(2001,m-1,d) - Date.UTC(2001,0,0)) / DAY); }
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ---------- baseline climate (per day-of-year, 1..366) ---------- */
+function baselineFromRegion(r){
+  const air0 = new Float64Array(367), soil0 = new Float64Array(367);
+  for (let d = 1; d <= 366; d++){
+    air0[d]  = r.ta + r.amp * Math.cos(2*Math.PI*(d-25)/365);
+    soil0[d] = r.ta + 0.92 * r.amp * Math.cos(2*Math.PI*(d-38)/365);
+  }
+  return { air0, soil0, lsf: mmddToDoy(r.lsf), faf: mmddToDoy(r.faf), ta: r.ta, src: 'table' };
+}
+/* Live: daily normals from Open-Meteo archive → air0 (already smoothed), soil derived by lagging */
+function baselineFromNormals(air0in, lsf, faf){
+  const air0 = new Float64Array(367);
+  for (let d = 1; d <= 366; d++) air0[d] = air0in[d];
+  let ta = 0; for (let d = 1; d <= 365; d++) ta += air0[d]; ta /= 365;
+  const soil0 = new Float64Array(367);
+  for (let d = 1; d <= 366; d++){
+    let s = 0; for (let k = 6; k <= 20; k++){ let dd = d - k; while (dd < 1) dd += 365; s += air0[dd]; }
+    s /= 15;
+    soil0[d] = ta + 0.92 * (s - ta);
+  }
+  return { air0, soil0, lsf, faf, ta, src: 'live' };
+}
+
+/* seasonal anomaly, cyclic linear interpolation between mid-season anchors */
+function seasonalAnom(doy, a){
+  const pts = [[15,a.sum],[105,a.aut],[196,a.win],[288,a.spr],[380,a.sum]];
+  let d = doy; if (d < 15) d += 365;
+  for (let i = 0; i < pts.length-1; i++){
+    if (d >= pts[i][0] && d <= pts[i+1][0]){
+      const f = (d - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+      return pts[i][1] + f * (pts[i+1][1] - pts[i][1]);
+    }
+  }
+  return 0;
+}
+
+/* ---------- the climate object ----------
+   o.todayMs   UTC-midnight ms of today
+   o.base      baseline
+   o.anchors   {t:{spr,sum,aut,win}, r:{…}}   seasonal outlook anomalies (°C / rain index)
+   o.tweak     user °C offset
+   o.protect   'none'|'cloche'|'glass'
+   o.live      optional: { obs:{t→anom}, fc:{i→anom}, seasonal:fn(t)->anom|null, soilBias }
+   o.normal    true → ignore all anomalies (used for "vs a normal year")                    */
+function buildClimate(o){
+  const N = NDAYS, base = o.base, live = o.live || {};
+  const doy = new Int16Array(N), month = new Int8Array(N);
+  const an = new Float64Array(N), air = new Float64Array(N), soil = new Float64Array(N);
+  const tweak = o.normal ? 0 : (o.tweak || 0);
+  const anchorsT = (o.anchors && o.anchors.t) || { spr:0, sum:0, aut:0, win:0 };
+  for (let t = 0; t < N; t++){
+    const ms = o.todayMs + (t - OFF) * DAY;
+    doy[t] = doyOfMs(ms); month[t] = new Date(ms).getUTCMonth() + 1;
+    let a = 0;
+    if (!o.normal){
+      a = seasonalAnom(doy[t], anchorsT);
+      if (live.seasonal){ const s = live.seasonal(t); if (s != null) a = s; }
+      if (t < OFF && live.obs && live.obs[t] != null) a = live.obs[t];
+      else if (t >= OFF && live.fc && live.fc[t-OFF] != null){
+        const w = Math.max(0, 1 - (t-OFF)/16);
+        a = a*(1-w) + live.fc[t-OFF]*w;
+      }
+    }
+    a += tweak;
+    an[t] = a;
+    const bias = (!o.normal && live.soilBias != null && t >= OFF) ? live.soilBias * Math.exp(-(t-OFF)/21) : 0;
+    air[t]  = base.air0[doy[t]]  + a + 0.5*bias;
+    soil[t] = base.soil0[doy[t]] + 0.9*a + bias;
+  }
+  const sprA = o.normal ? 0 : anchorsT.spr + tweak, autA = o.normal ? 0 : anchorsT.aut + tweak;
+  const lsf = base.lsf - clamp(Math.round(9*sprA), -14, 14);
+  const faf = base.faf + clamp(Math.round(9*autA), -14, 14);
+  const P = PROTECTION[o.protect || 'none'];
+  const v = { base: { air, soil, lsf, faf } };
+  if (P.shift || P.pa){
+    const airP = new Float64Array(N), soilP = new Float64Array(N);
+    for (let t = 0; t < N; t++){ airP[t] = air[t] + P.pa; soilP[t] = soil[t] + P.ps; }
+    v.prot = { air: airP, soil: soilP, lsf: lsf - P.shift, faf: faf + P.shift };
+  } else v.prot = v.base;
+  return { N, doy, month, an, v, todayMs: o.todayMs, protect: o.protect || 'none', _cum: {},
+           dateOf(t){ return new Date(this.todayMs + (t - OFF)*DAY); } };
+}
+
+/* ---------- thermal time ---------- */
+function cumGDD(C, vk, tb){
+  const key = vk + '|' + tb;
+  if (C._cum[key]) return C._cum[key];
+  const air = C.v[vk].air, c = new Float64Array(C.N + 1);
+  for (let i = 0; i < C.N; i++) c[i+1] = c[i] + Math.max(0, air[i] - tb);
+  return C._cum[key] = c;
+}
+function maturityDay(C, vk, tb, p, gdd){
+  const c = cumGDD(C, vk, tb), target = c[p] + gdd;
+  if (c[C.N] < target) return -1;
+  let lo = p, hi = C.N - 1;
+  while (lo < hi){ const mid = (lo + hi) >> 1; if (c[mid+1] >= target) hi = mid; else lo = mid + 1; }
+  return lo;
+}
+function nextDoy(C, from, d){ for (let t = from; t < C.N; t++) if (C.doy[t] === d) return t; return C.N; }
+function meanAir(C, vk, a, b){
+  const air = C.v[vk].air; a = clamp(a, 0, C.N-1); b = clamp(b, a, C.N-1);
+  let s = 0; for (let t = a; t <= b; t++) s += air[t]; return s / (b - a + 1);
+}
+function vkFor(C, crop){ return crop.warm ? 'prot' : 'base'; }
+
+/* Can this crop go in the ground on day p? If so, when does it mature? */
+function evalPlant(C, crop, p){
+  const vk = vkFor(C, crop), v = C.v[vk];
+  if (crop.months && crop.months.indexOf(C.month[p]) < 0) return null;
+  if (v.soil[p] < crop.minSoil) return null;
+  const d = C.doy[p];
+  if (crop.fb != null && !(d >= v.lsf + crop.fb || d <= v.faf)) return null;
+  const gdd = crop.d * (crop.rt - crop.tb);
+  const m = maturityDay(C, vk, crop.tb, p, gdd);
+  if (m < 0) return null;
+  const days = m - p;
+  const slow = crop.slow || (crop.warm ? 1.35 : 1.7);
+  if (days > crop.d * slow) return null;
+  let status = 'ok', flag = null, end = m + crop.span;
+  if (crop.warm){
+    const faf = nextDoy(C, p, v.faf);
+    if (m + Math.round(crop.span*0.4) > faf) return null;
+    const endT = crop.endT != null ? crop.endT : crop.tb + 3.5;
+    if (v.air[Math.min(m + Math.round(crop.span*0.5), C.N-1)] < endT) return null;
+    end = Math.min(m + crop.span, Math.max(m + 7, faf));
+  } else if (crop.hmax){
+    const mh = meanAir(C, vk, m - Math.round(days/3), m + Math.round(crop.span/2));
+    if (mh > crop.hmax + 2) return null;
+    if (mh > crop.hmax){ status = 'caution'; flag = 'heat'; }
+  }
+  return { p, m, end, days, status, flag, gdd };
+}
+
+function actualPlant(C, crop, p){
+  const vk = vkFor(C, crop);
+  const gdd = crop.d * (crop.rt - crop.tb);
+  const m = maturityDay(C, vk, crop.tb, p, gdd);
+  const mm = m < 0 ? Math.min(C.N-1, p + Math.round(crop.d*1.6)) : m;
+  return { p, m: mm, end: mm + crop.span, days: mm - p, status: 'actual', flag: m < 0 ? 'unfinished' : null, gdd };
+}
+
+/* ---------- scheduling ---------- */
+function planCrop(C, crop, o){
+  const res = [], pMax = Math.min(C.N - 2, OFF + o.hor);
+  const cap = o.succ ? crop.max : 1;
+  let start = OFF;
+  for (let r = 0; r < cap; r++){
+    let pl = null;
+    const ovd = o.ov && o.ov[crop.id + '|' + r];
+    if (ovd){
+      const pIdx = Math.round((Date.parse(ovd + 'T00:00:00Z') - C.todayMs) / DAY) + OFF;
+      if (pIdx >= 0 && pIdx < C.N - 2) pl = actualPlant(C, crop, pIdx);
+    }
+    if (!pl){
+      for (let q = start; q < pMax; q++){ const e = evalPlant(C, crop, q); if (e){ pl = e; break; } }
+    }
+    if (!pl) break;
+    pl.cropId = crop.id; pl.r = r; pl.key = crop.id + '|' + r;
+    res.push(pl);
+    if (crop.mode === 'seq'){ const f = crop.nxt != null ? crop.nxt : 1; start = f >= 1 ? pl.end + 2 : Math.max(pl.p + 10, pl.m + Math.round(crop.span * f)); }
+    else start = pl.p + crop.gap;
+  }
+  return res;
+}
+
+function schedule(C, sel, o){
+  const out = [];
+  for (const id in sel){ const crop = CROP_BY_ID[id]; if (!crop) continue;
+    for (const pl of planCrop(C, crop, o)) out.push(pl); }
+  out.sort((a,b) => a.p - b.p);
+  return out;
+}
+
+/* ---------- bed packing (1-D strip of bedW-wide beds, first-fit in time+space) ---------- */
+function packPlan(plantings, sel, scale, Ltot, bedW){
+  const items = plantings.map(pl => {
+    const crop = CROP_BY_ID[pl.cropId];
+    const plants = Math.max(1, Math.round(sel[pl.cropId] * scale));
+    const area = plants / crop.pm;
+    return Object.assign({}, pl, { plants, area, len: area / bedW, x: null });
+  });
+  const order = items.slice().sort((a,b) => a.p - b.p || b.len - a.len);
+  const placed = [], lastX = {}, overflow = [];
+  for (const it of order){
+    const busy = placed.filter(q => q.p < it.end && it.p < q.end);
+    const cands = [];
+    if (lastX[it.cropId] != null) cands.push(lastX[it.cropId]);
+    cands.push(0); busy.forEach(q => cands.push(q.x + q.len));
+    cands.sort((a,b) => a - b);
+    let ok = null;
+    for (const x of cands){
+      if (x + it.len > Ltot + 1e-6) continue;
+      if (busy.every(q => x + it.len <= q.x + 1e-6 || q.x + q.len <= x + 1e-6)){ ok = x; break; }
+    }
+    if (ok == null){ it.x = null; overflow.push(it); }
+    else { it.x = ok; placed.push(it); lastX[it.cropId] = ok; }
+  }
+  return { items, overflow };
+}
+
+function autoFit(plantings, sel, Ltot, bedW){
+  for (let s = 1; s >= 0.25; s -= 0.05){
+    const r = packPlan(plantings, sel, s, Ltot, bedW);
+    if (!r.overflow.length) return Math.round(s*100)/100;
+  }
+  return 0.25;
+}
+
+function utilisation(items, Aarea, from, to, step){
+  const out = [];
+  for (let t = from; t < to; t += step){
+    let used = 0; for (const it of items) if (it.x != null && it.p <= t && t < it.end) used += it.area;
+    out.push({ t, used, pct: Aarea > 0 ? used / Aarea : 0 });
+  }
+  return out;
+}
+
+/* ---------- shopping list ---------- */
+function shopping(items, waterMult, areaGrow){
+  const byCrop = {};
+  for (const it of items){
+    const c = CROP_BY_ID[it.cropId];
+    const e = byCrop[c.id] || (byCrop[c.id] = { crop: c, plants: 0, rounds: 0 });
+    e.plants += it.plants; e.rounds++;
+  }
+  const rows = Object.values(byCrop).map(e => {
+    const c = e.crop; let buy = '', extra = '';
+    if (c.kind === 'seedling'){ buy = e.plants + ' seedlings'; extra = 'or ~' + Math.ceil(e.plants*1.3) + ' seeds to raise your own' + (c.pack > 1 ? ' (' + Math.ceil(e.plants*1.3 / c.pack) + ' packet' + (Math.ceil(e.plants*1.3 / c.pack) > 1 ? 's' : '') + ')' : ''); }
+    else if (c.kind === 'direct'){ const seeds = Math.ceil(e.plants * (c.sow || 1.5)); const pk = Math.max(1, Math.ceil(seeds / c.pack)); buy = seeds + ' seeds'; extra = pk + ' packet' + (pk > 1 ? 's' : ''); }
+    else if (c.kind === 'tuber'){ buy = (Math.ceil(e.plants * 0.07 * 2) / 2).toFixed(1) + ' kg seed potatoes'; extra = 'certified seed, ~' + e.plants + ' tubers'; }
+    else if (c.kind === 'clove'){ buy = Math.ceil(e.plants / 7) + ' bulbs of seed garlic'; extra = 'split into ~' + e.plants + ' cloves'; }
+    else if (c.kind === 'slip'){ buy = e.plants + ' kumara slips'; extra = 'or sprout your own from tubers'; }
+    return { id: c.id, name: c.n, group: c.g, plants: e.plants, rounds: e.rounds, buy, extra,
+             kg: Math.round(e.plants * c.kg * 10) / 10, water: c.water };
+  });
+  rows.sort((a,b) => GROUPS[a.group].slot - GROUPS[b.group].slot || a.name.localeCompare(b.name));
+  const P = id => (byCrop[id] ? byCrop[id].plants / Math.max(1, byCrop[id].rounds) : 0);
+  const supplies = [];
+  supplies.push({ name: 'Compost (top-dress 2.5 cm)', qty: Math.ceil(areaGrow * 25 / 40) + ' × 40 L bags' });
+  supplies.push({ name: 'Mulch (pea straw / bark, 5 cm)', qty: Math.ceil(areaGrow * 50 / 40) + ' × 40 L bags' });
+  const stakes = Math.ceil(P('tomato') + P('cherry'));
+  if (stakes) supplies.push({ name: 'Tomato stakes or cages', qty: stakes });
+  if (byCrop.cbean) supplies.push({ name: 'Bean poles / teepee canes', qty: Math.ceil(P('cbean') / 3) + ' × 2 m canes' });
+  if (byCrop.cucumber) supplies.push({ name: 'Trellis / netting for cucumbers', qty: Math.max(1, Math.ceil(P('cucumber') * 0.3)) + ' m' });
+  const brassArea = items.filter(i => CROP_BY_ID[i.cropId].g === 'bras').reduce((s,i) => Math.max(s, i.area), 0);
+  if (brassArea > 0) supplies.push({ name: 'Insect netting for brassicas', qty: '≈ ' + Math.ceil(brassArea * 1.3) + ' m²' });
+  return { rows, supplies };
+}
+
+/* ---------- agenda events ---------- */
+function events(items, C){
+  const ev = [];
+  for (const it of items){
+    const c = CROP_BY_ID[it.cropId];
+    if (c.nur > 0){
+      const t = it.p - c.nur * 7;
+      ev.push({ t, key: it.key, cropId: c.id, kind: 'sow', text: (t < OFF ? 'Buy ' + c.n.toLowerCase() + ' seedlings' : 'Sow ' + c.n.toLowerCase() + ' seed in trays'), r: it.r });
+    }
+    const verb = c.kind === 'direct' ? 'Sow ' + c.n.toLowerCase() + ' direct' : c.kind === 'tuber' ? 'Plant ' + c.n.toLowerCase() : c.kind === 'clove' ? 'Plant ' + c.n.toLowerCase() + ' cloves' : c.kind === 'slip' ? 'Plant out ' + c.n.toLowerCase() + ' slips' : 'Plant out ' + c.n.toLowerCase();
+    ev.push({ t: it.p, key: it.key, cropId: c.id, kind: 'plant', text: verb, r: it.r });
+    ev.push({ t: it.m, key: it.key, cropId: c.id, kind: 'harvest', text: 'First ' + c.n.toLowerCase() + ' harvest', r: it.r });
+  }
+  ev.sort((a,b) => a.t - b.t);
+  return ev;
+}
+
+/* ---------- climate stats for the briefing ---------- */
+function climateStats(C, hor){
+  const v = C.v.base;
+  let warm = 0; for (let t = OFF; t < OFF + 365; t++) if (v.air[t] >= 14) warm++;
+  const lsfT = nextDoy(C, OFF - 60, v.lsf), fafT = nextDoy(C, Math.max(OFF - 60, 0), v.faf);
+  return { warmDays: warm, lsfT, fafT, lsf: v.lsf, faf: v.faf };
+}
+
+/* first feasible plant date from today (or null) */
+function firstFeasible(C, crop, hor){
+  const pMax = Math.min(C.N - 2, OFF + (hor || 365));
+  for (let q = OFF; q < pMax; q++){ const e = evalPlant(C, crop, q); if (e) return e; }
+  return null;
+}
+
+if (typeof module !== 'undefined') module.exports = { OFF, NDAYS, DAY, CROP_BY_ID, PROTECTION, utcMidnight, doyOfMs, mmddToDoy, baselineFromRegion, baselineFromNormals, seasonalAnom, buildClimate, evalPlant, planCrop, schedule, packPlan, autoFit, utilisation, shopping, events, climateStats, firstFeasible, MONTHS };
+
+/* ============================================================
+   WEATHER — live data from Open-Meteo (free, no API key, CORS-enabled)
+   https://open-meteo.com  ·  data licensed CC BY 4.0
+   Every call is optional: if anything fails the planner quietly falls back to the
+   built-in regional climate table + NIWA outlook and reports what happened in the
+   "Data sources" panel.
+   ============================================================ */
+const OM = {
+  geocode:  'https://geocoding-api.open-meteo.com/v1/search',
+  forecast: 'https://api.open-meteo.com/v1/forecast',
+  archive:  'https://archive-api.open-meteo.com/v1/archive'
+};
+const NZ_TZ = 'Pacific/Auckland';
+
+/* today's calendar date in New Zealand, whatever the viewer's device timezone is */
+function nzToday(){
+  const s = new Intl.DateTimeFormat('en-CA', { timeZone: NZ_TZ, year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+  const [y,m,d] = s.split('-').map(Number);
+  return Date.UTC(y, m-1, d);
+}
+function isoOfMs(ms){ return new Date(ms).toISOString().slice(0,10); }
+
+async function omGet(base, params, timeoutMs){
+  const qs = Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&');
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeoutMs || 15000);
+  try {
+    const res = await fetch(base + '?' + qs, { signal: ctl.signal });
+    if (!res.ok){
+      let reason = '';
+      try { const j = await res.json(); reason = j && j.reason ? ' — ' + j.reason : ''; } catch(e){}
+      throw new Error('HTTP ' + res.status + reason);
+    }
+    return await res.json();
+  } catch (e){
+    if (e.name === 'AbortError') throw new Error('timed out');
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+
+/* --- place search (NZ only) --- */
+async function searchPlaces(q){
+  const j = await omGet(OM.geocode, { name: q, count: 8, language: 'en', format: 'json', countryCode: 'NZ' }, 10000);
+  return (j.results || []).map(r => ({
+    name: r.name, admin: r.admin2 || r.admin1 || '', lat: r.latitude, lon: r.longitude, elev: r.elevation
+  }));
+}
+
+/* --- forecast + last 30 days + soil temperature --- */
+async function loadForecast(lat, lon, todayMs){
+  const params = {
+    latitude: lat.toFixed(4), longitude: lon.toFixed(4),
+    daily: 'temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum',
+    hourly: 'soil_temperature_6cm',
+    past_days: 30, forecast_days: 16, timezone: NZ_TZ
+  };
+  let j;
+  try { j = await omGet(OM.forecast, params); }
+  catch (e){
+    if (!/HTTP 400/.test(e.message)) throw e;
+    params.daily = 'temperature_2m_max,temperature_2m_min,precipitation_sum';       // older API without daily mean
+    j = await omGet(OM.forecast, params);
+  }
+  const d = j.daily;
+  if (!d || !d.time || !d.temperature_2m_max || !d.temperature_2m_min) throw new Error('unexpected response shape');
+  const days = d.time.map((s, i) => ({
+    t: Math.round((Date.parse(s + 'T00:00:00Z') - todayMs) / DAY),   // 0 = today, negative = past
+    date: s, max: d.temperature_2m_max[i], min: d.temperature_2m_min[i], rain: d.precipitation_sum ? d.precipitation_sum[i] : 0,
+    mean: d.temperature_2m_mean && d.temperature_2m_mean[i] != null ? d.temperature_2m_mean[i] : (d.temperature_2m_max[i] != null && d.temperature_2m_min[i] != null ? (d.temperature_2m_max[i] + d.temperature_2m_min[i]) / 2 : null)
+  }));
+  /* soil: mean of today's hourly values */
+  let soilToday = null;
+  const h = j.hourly;
+  if (h && h.time && h.soil_temperature_6cm){
+    const todayStr = isoOfMs(todayMs); let s = 0, n = 0;
+    h.time.forEach((ts, i) => { if (ts.slice(0,10) === todayStr && h.soil_temperature_6cm[i] != null){ s += h.soil_temperature_6cm[i]; n++; } });
+    if (n) soilToday = s / n;
+  }
+  return { days, soilToday, fetched: Date.now() };
+}
+
+/* --- 10 years of history → this place's own climate normals + frost dates --- */
+async function loadClimate(lat, lon){
+  const y1 = new Date().getUTCFullYear() - 1, y0 = y1 - 9;
+  const params = {
+    latitude: lat.toFixed(4), longitude: lon.toFixed(4),
+    start_date: y0 + '-01-01', end_date: y1 + '-12-31',
+    daily: 'temperature_2m_mean,temperature_2m_min', timezone: NZ_TZ
+  };
+  let j;
+  try { j = await omGet(OM.archive, params, 30000); }
+  catch (e){
+    if (!/HTTP 400/.test(e.message)) throw e;
+    params.daily = 'temperature_2m_max,temperature_2m_min';
+    j = await omGet(OM.archive, params, 30000);
+  }
+  const d = j.daily;
+  if (!d || !d.time || !d.temperature_2m_min) throw new Error('unexpected response shape');
+  if (!d.temperature_2m_mean){
+    if (!d.temperature_2m_max) throw new Error('unexpected response shape');
+    d.temperature_2m_mean = d.temperature_2m_max.map((x, i) => (x != null && d.temperature_2m_min[i] != null) ? (x + d.temperature_2m_min[i]) / 2 : null);
+  }
+  const sum = new Float64Array(367), cnt = new Float64Array(367);
+  const lsfs = [], fafs = [];
+  const byYear = {};
+  d.time.forEach((s, i) => {
+    const ms = Date.parse(s + 'T00:00:00Z'), dy = doyOfMs(ms), yr = +s.slice(0,4);
+    const tm = d.temperature_2m_mean[i], tn = d.temperature_2m_min[i];
+    if (tm != null){ sum[dy] += tm; cnt[dy]++; }
+    (byYear[yr] || (byYear[yr] = [])).push({ dy, tn });
+  });
+  const raw = new Float64Array(367);
+  for (let k = 1; k <= 366; k++) raw[k] = cnt[k] ? sum[k] / cnt[k] : NaN;
+  if (isNaN(raw[366])) raw[366] = raw[365];
+  /* circular smoothing (±10 days) */
+  const air0 = new Float64Array(367);
+  for (let k = 1; k <= 366; k++){
+    let s = 0, n = 0;
+    for (let o = -10; o <= 10; o++){ let kk = k + o; while (kk < 1) kk += 365; while (kk > 365 && kk !== 366) kk -= 365; const v = raw[kk]; if (!isNaN(v)){ s += v; n++; } }
+    air0[k] = s / n;
+  }
+  /* frost: air min ≤ 3 °C at 2 m ≈ light ground frost */
+  const FROST = 3.0;
+  let frostYears = 0;
+  for (const yr in byYear){
+    const arr = byYear[yr];
+    let last = null, first = null;
+    for (const r of arr){
+      if (r.tn == null) continue;
+      if (r.tn <= FROST){
+        if (r.dy >= 182 && (last == null || r.dy > last)) last = r.dy;     // Jul 1 → Dec 31: latest = last spring frost
+        if (r.dy >= 60 && r.dy < 244 && (first == null || r.dy < first)) first = r.dy;  // Mar 1 → Aug 31: earliest = first autumn frost
+      }
+    }
+    if (last != null && first != null){ lsfs.push(last); fafs.push(first); frostYears++; }
+  }
+  const nYears = Object.keys(byYear).length;
+  let lsf, faf, frostFree = false;
+  if (frostYears < Math.max(3, nYears * 0.4)){
+    lsf = mmddToDoy('07-25'); faf = mmddToDoy('06-15'); frostFree = true;     // effectively frost-free
+  } else {
+    lsfs.sort((a,b) => a - b); fafs.sort((a,b) => a - b);
+    lsf = lsfs[Math.min(lsfs.length - 1, Math.floor(lsfs.length * 0.75))];     // later-than-typical last frost
+    faf = fafs[Math.floor(fafs.length * 0.25)];                                // earlier-than-typical first frost
+  }
+  return { air0: Array.from(air0), lsf, faf, frostFree, years: nYears, span: y0 + '–' + y1, fetched: Date.now() };
+}
+
+/* --- small localStorage cache (per-viewer convenience only) --- */
+function cacheGet(key, maxAgeMs){
+  try { const raw = localStorage.getItem(key); if (!raw) return null; const o = JSON.parse(raw); if (Date.now() - o.at > maxAgeMs) return null; return o.v; } catch(e){ return null; }
+}
+function cacheSet(key, v){ try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), v })); } catch(e){} }
+
+/* --- Optional: same-site outlook.json overrides the built-in NIWA outlook --- */
+async function loadOutlookFile(){
+  const res = await fetch('outlook.json?ts=' + Date.now(), { cache: 'no-store' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const j = await res.json();
+  if (!j.groups || !j.updated) throw new Error('missing groups/updated');
+  return j;
+}
+
+/* haversine km, for nearest-region fallback */
+function kmBetween(a, b){
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function nearestRegion(lat, lon){
+  let best = REGIONS[0], bd = 1e9;
+  for (const r of REGIONS){ const d = kmBetween({ lat, lon }, r); if (d < bd){ bd = d; best = r; } }
+  return best;
+}
+
+/* ============================================================
+   UI CORE — state, persistence, live-data orchestration, compute()
+   ============================================================ */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+const TODAY = nzToday();
+const LS_KEY = 'tgp4000.v1';
+
+const STARTER = { tomato:4, capsicum:3, zucchini:2, cucumber:3, corn:12, dbean:24, lettuce:6, basil:4, carrot:60 };
+
+const DEFAULTS = {
+  region: 'pukekohe', place: null,
+  len: 6, wid: 4, paths: 20, bedW: 1.2,
+  outlook: 'auto', tweak: 0, rain: 'auto', protect: 'none',
+  hor: 365, succ: true, fit: false, useLive: true, soilNow: '',
+  sel: Object.assign({}, STARTER),
+  prog: {}, tab: 'calendar', viewT: null, focus: null
+};
+let S = loadState();
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw){ const o = JSON.parse(raw); return Object.assign({}, DEFAULTS, o, { sel: o.sel || Object.assign({}, STARTER), prog: o.prog || {} }); }
+  } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+let saveTimer = null;
+function saveState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){} }, 250);
+}
+
+/* ---------- date helpers (timeline index t; today = OFF) ---------- */
+function dateOfT(t){ return new Date(TODAY + (t - OFF) * DAY); }
+function fmtT(t, withDow){ const d = dateOfT(t); return (withDow ? DOW[d.getUTCDay()] + ' ' : '') + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]; }
+function fmtTY(t){ const d = dateOfT(t); return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+function isoOfT(t){ return isoOfMs(TODAY + (t - OFF) * DAY); }
+
+/* ---------- location ---------- */
+function resolveLocation(){
+  if (S.place){
+    const nr = nearestRegion(S.place.lat, S.place.lon);
+    return { name: S.place.name + (S.place.admin ? ', ' + S.place.admin : ''), lat: S.place.lat, lon: S.place.lon, base: nr, grp: nr.grp, custom: true, ms: null };
+  }
+  const r = REGIONS.find(x => x.id === S.region) || REGIONS.find(x => x.id === 'pukekohe');
+  return { name: r.name, lat: r.lat, lon: r.lon, base: r, grp: r.grp, custom: false, ms: r.ms };
+}
+
+/* ---------- live data ---------- */
+const LIVE = { key: null, fc: null, clim: null, st: { fc: { s:'idle' }, clim: { s:'idle' }, outlook: { s:'idle' } }, token: 0 };
+let CURRENT_OUTLOOK = OUTLOOK;
+
+async function refreshLive(force){
+  const loc = resolveLocation();
+  const key = loc.lat.toFixed(2) + ',' + loc.lon.toFixed(2);
+  if (!force && LIVE.key === key) return;
+  LIVE.key = key; LIVE.fc = null; LIVE.clim = null; const tok = ++LIVE.token;
+  LIVE.st.fc = { s:'loading' }; LIVE.st.clim = { s:'loading' };
+  renderStatus();
+
+  const fcKey = 'tgp.fc.' + key, clKey = 'tgp.clim.' + key;
+  const cachedFc = force ? null : cacheGet(fcKey, 2 * 3600e3);
+  const cachedCl = force ? null : cacheGet(clKey, 60 * 86400e3);
+
+  const pFc = (async () => {
+    try {
+      let v = cachedFc, from = 'live';
+      if (v && v.todayMs === TODAY){ from = 'cached'; } else { v = await loadForecast(loc.lat, loc.lon, TODAY); v.todayMs = TODAY; cacheSet(fcKey, v); }
+      if (tok !== LIVE.token) return;
+      LIVE.fc = v; LIVE.st.fc = { s:'ok', msg: 'Forecast, last 30 days and soil temperature (' + from + ')', at: v.fetched };
+    } catch(e){ if (tok !== LIVE.token) return; LIVE.st.fc = { s:'error', msg: e.message }; }
+    if (tok === LIVE.token){ renderStatus(); update(); }
+  })();
+  const pCl = (async () => {
+    try {
+      let v = cachedCl, from = 'live';
+      if (v) from = 'cached'; else { v = await loadClimate(loc.lat, loc.lon); cacheSet(clKey, v); }
+      if (tok !== LIVE.token) return;
+      LIVE.clim = v;
+      LIVE.st.clim = { s:'ok', msg: 'Climate history ' + v.span + ' for this exact spot' + (v.frostFree ? ' — effectively frost-free' : '') + ' (' + from + ')', at: v.fetched };
+    } catch(e){ if (tok !== LIVE.token) return; LIVE.st.clim = { s:'error', msg: e.message }; }
+    if (tok === LIVE.token){ renderStatus(); update(); }
+  })();
+  await Promise.all([pFc, pCl]);
+}
+
+async function refreshOutlook(){
+  try {
+    const j = await loadOutlookFile();
+    CURRENT_OUTLOOK = j;
+    LIVE.st.outlook = { s:'ok', msg: 'outlook.json (issued ' + j.updated + ')' };
+  } catch(e){
+    CURRENT_OUTLOOK = OUTLOOK;
+    LIVE.st.outlook = { s:'builtin', msg: 'Using the outlook built into this page (issued ' + OUTLOOK.updated + ')' };
+  }
+  renderStatus(); update();
+}
+
+/* ---------- compute ---------- */
+function measuredSoil(){
+  const v = parseFloat(S.soilNow);
+  if (!isNaN(v) && v > -5 && v < 40) return { v, src: 'you' };
+  if (S.useLive && LIVE.fc && LIVE.fc.soilToday != null) return { v: LIVE.fc.soilToday, src: 'forecast model' };
+  return null;
+}
+
+function compute(){
+  const loc = resolveLocation();
+  const grp = loc.grp, O = CURRENT_OUTLOOK;
+  let anchors;
+  if (S.outlook === 'neutral') anchors = { t:{ spr:0, sum:0, aut:0, win:0 }, r:{ spr:0, sum:0, aut:0, win:0 } };
+  else if (S.outlook === 'lanina') anchors = LANINA[grp];
+  else anchors = O.groups[grp] || O.groups.north;
+  if (S.rain !== 'auto'){ const v = { dry:-1, normal:0, wet:1 }[S.rain]; anchors = { t: anchors.t, r:{ spr:v, sum:v, aut:v, win:v } }; }
+
+  const base = LIVE.clim ? baselineFromNormals(LIVE.clim.air0, LIVE.clim.lsf, LIVE.clim.faf) : baselineFromRegion(loc.base);
+
+  /* live overlay: real recent temps + 16-day forecast (only when using live data and not "normal year") */
+  const live = {};
+  if (S.useLive && LIVE.fc && S.outlook !== 'neutral'){
+    live.obs = {}; live.fc = {};
+    for (const d of LIVE.fc.days){
+      if (d.mean == null) continue;
+      const dy = doyOfMs(TODAY + d.t * DAY);
+      const an = d.mean - base.air0[dy];
+      if (d.t < 0 && d.t >= -30) live.obs[OFF + d.t] = an;
+      else if (d.t >= 0 && d.t < 16) live.fc[d.t] = an;
+    }
+  }
+  const opts = { todayMs: TODAY, base, anchors, tweak: S.tweak, protect: S.protect, live };
+  let C = buildClimate(opts);
+  const ms = measuredSoil();
+  if (ms){ live.soilBias = clamp(ms.v - C.v.base.soil[OFF], -8, 8); C = buildClimate(opts); }
+  const Cn = buildClimate({ todayMs: TODAY, base, anchors, protect: S.protect, normal: true });
+  const Cc = S.protect === 'none' ? buildClimate({ todayMs: TODAY, base, anchors, tweak: S.tweak, protect: 'cloche', live }) : null;
+
+  /* selected crops, actual-planting overrides */
+  const sel = {}; Object.keys(S.sel).forEach(id => { if (CROP_BY_ID[id] && S.sel[id] > 0) sel[id] = S.sel[id]; });
+  const ov = {}; Object.keys(S.prog).forEach(k => { if (S.prog[k] && S.prog[k].a) ov[k] = S.prog[k].a; });
+  const sopts = { succ: S.succ, hor: S.hor, ov };
+  const plantings = schedule(C, sel, sopts);
+  const normalBy = {};
+  Object.keys(sel).forEach(id => { normalBy[id] = planCrop(Cn, CROP_BY_ID[id], { succ: S.succ, hor: S.hor }); });
+
+  const growArea = Math.max(0.1, S.len * S.wid * (1 - S.paths / 100));
+  const Ltot = growArea / S.bedW;
+  const scale = S.fit ? autoFit(plantings, sel, Ltot, S.bedW) : 1;
+  const packed = packPlan(plantings, sel, scale, Ltot, S.bedW);
+  const placed = packed.items.filter(i => i.x != null);
+  const util = utilisation(packed.items, growArea, OFF, OFF + S.hor + 60, 7);
+  const peak = util.reduce((m, u) => u.used > m.used ? u : m, { used: 0, t: OFF });
+  const rainMult = 1 - 0.3 * clamp(anchors.r.sum, -1, 1);
+  const shop = shopping(placed, rainMult, growArea);
+  const ev = events(placed, C);
+
+  return { loc, grp, anchors, base, C, Cn, Cc, sel, plantings, normalBy, growArea, Ltot, scale, packed, placed, util, peak,
+           shop, ev, stats: climateStats(C), statsN: climateStats(Cn), rainMult, soil: ms };
+}
+
+let R = null;
+function update(){ R = compute(); renderMain(); saveState(); }
+
+/* ============================================================
+   UI RENDER — sidebar, briefing, crops, results tabs, events
+   ============================================================ */
+const sw = c => '<i class="sw" style="background:var(--g' + GROUPS[c.g].slot + ')"></i>';
+const round1 = x => Math.round(x * 10) / 10;
+const signed = (x, u) => (x > 0 ? '+' : x < 0 ? '−' : '±') + Math.abs(round1(x)) + (u || '');
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+
+/* ---------------- sidebar (built once) ---------------- */
+function renderSidebar(){
+  const opts = ['North Island', 'South Island'].map(isl =>
+    '<optgroup label="' + isl + '">' + REGIONS.filter(r => r.isl === isl).map(r => '<option value="' + r.id + '">' + esc(r.name) + '</option>').join('') + '</optgroup>').join('');
+  $('#side').innerHTML = `
+  <section class="panel">
+    <h3>Where</h3>
+    <label class="fld" for="region">Region</label>
+    <select id="region" data-bind="region">${opts}</select>
+    <div class="place">
+      <label class="fld" for="placeQ">…or search any NZ town or suburb</label>
+      <div class="row"><input id="placeQ" type="search" placeholder="e.g. Waiuku, Havelock North" autocomplete="off"><button class="btn" data-act="search" type="button">Search</button></div>
+      <div id="placeRes" class="placeRes" role="listbox"></div>
+    </div>
+  </section>
+  <section class="panel">
+    <h3>Your space</h3>
+    <div class="grid2">
+      <div><label class="fld" for="len">Length (m)</label><input id="len" type="number" min="0.5" max="200" step="0.5" data-bind="len"></div>
+      <div><label class="fld" for="wid">Width (m)</label><input id="wid" type="number" min="0.5" max="200" step="0.5" data-bind="wid"></div>
+      <div><label class="fld" for="paths">Paths &amp; gaps (%)</label><input id="paths" type="number" min="0" max="60" step="5" data-bind="paths"></div>
+      <div><label class="fld" for="bedW">Bed width (m)</label><input id="bedW" type="number" min="0.6" max="2.4" step="0.1" data-bind="bedW"></div>
+    </div>
+    <div class="presets"><button class="chip sm" data-act="size" data-l="2.4" data-w="1.2" type="button">One raised bed</button><button class="chip sm" data-act="size" data-l="4" data-w="3" type="button">Small patch</button><button class="chip sm" data-act="size" data-l="6" data-w="4" type="button">Backyard plot</button><button class="chip sm" data-act="size" data-l="10" data-w="6" type="button">Big garden</button></div>
+    <p class="hint" id="areaOut"></p>
+  </section>
+  <section class="panel">
+    <h3>Weather</h3>
+    <label class="fld" for="outlook">Season outlook</label>
+    <select id="outlook" data-bind="outlook">${Object.keys(OUTLOOK_PRESETS).map(k => '<option value="' + k + '">' + esc(OUTLOOK_PRESETS[k].label) + '</option>').join('')}</select>
+    <label class="fld" for="tweak">Your own nudge: <b id="tweakOut"></b></label>
+    <input id="tweak" type="range" min="-2" max="2" step="0.5" data-bind="tweak">
+    <div class="scale"><span>cooler</span><span>as forecast</span><span>hotter</span></div>
+    <label class="fld" for="rain">Rainfall</label>
+    <select id="rain" data-bind="rain"><option value="auto">Follow the outlook</option><option value="dry">Dry season</option><option value="normal">Normal</option><option value="wet">Wet season</option></select>
+    <label class="fld" for="soilNow">Soil temperature today, if you’ve measured it (°C)</label>
+    <input id="soilNow" type="number" min="0" max="35" step="0.5" placeholder="e.g. 14" data-bind="soilNow">
+    <label class="chk"><input id="useLive" type="checkbox" data-bind="useLive"> Use live forecast &amp; recent weather</label>
+    <div id="status" class="status"></div>
+  </section>
+  <section class="panel">
+    <h3>Growing setup</h3>
+    <label class="fld" for="protect">Protection</label>
+    <select id="protect" data-bind="protect">${Object.keys(PROTECTION).map(k => '<option value="' + k + '">' + esc(PROTECTION[k].label) + '</option>').join('')}</select>
+    <label class="fld" for="hor">Plan length</label>
+    <select id="hor" data-bind="hor"><option value="183">Next 6 months</option><option value="365">Next 12 months</option><option value="545">Next 18 months</option></select>
+    <label class="chk"><input id="succ" type="checkbox" data-bind="succ"> Squeeze in follow-on rounds when the season allows</label>
+  </section>`;
+  syncSidebar();
+}
+function syncSidebar(){
+  const set = (id, v) => { const el = $('#' + id); if (el && document.activeElement !== el) el.value = v; };
+  ['len','wid','paths','bedW','outlook','tweak','rain','soilNow','protect','hor'].forEach(k => set(k, S[k]));
+  $('#useLive').checked = !!S.useLive; $('#succ').checked = !!S.succ;
+  /* region select: show searched place as first option when active */
+  const sel = $('#region');
+  const old = sel.querySelector('option[value="__place"]'); if (old) old.remove();
+  if (S.place){
+    const o = document.createElement('option'); o.value = '__place'; o.textContent = 'Searched: ' + S.place.name + (S.place.admin ? ', ' + S.place.admin : '');
+    sel.insertBefore(o, sel.firstChild); sel.value = '__place';
+  } else sel.value = S.region;
+  $('#tweakOut').textContent = S.tweak === 0 ? 'none' : signed(S.tweak, ' °C');
+}
+
+function renderStatus(){
+  const el = $('#status'); if (!el) return;
+  const row = (label, st) => {
+    const cls = st.s === 'ok' ? 'ok' : st.s === 'loading' ? 'load' : st.s === 'error' ? 'err' : 'off';
+    const word = st.s === 'ok' ? (label === 'Seasonal outlook' ? 'Updated' : 'Live') : st.s === 'loading' ? 'Loading…' : st.s === 'error' ? 'Offline' : st.s === 'builtin' ? 'Built-in' : '—';
+    return '<li><span class="dot ' + cls + '"></span><span><b>' + label + ':</b> ' + word + (st.msg ? ' <em>' + esc(st.msg) + '</em>' : '') + '</span></li>';
+  };
+  el.innerHTML = '<details><summary>Data sources</summary><ul>' + row('Forecast &amp; soil', LIVE.st.fc) + row('Climate history', LIVE.st.clim) + row('Seasonal outlook', LIVE.st.outlook) +
+    '</ul><p class="hint">If a source is offline the planner uses its built-in regional table and NIWA outlook, so it still works. <button class="lnk" data-act="refresh" type="button">Refresh live data</button></p></details>';
+}
+
+/* ---------------- briefing ---------------- */
+function tempWords(){
+  if (S.outlook === 'neutral') return 'Planning for a normal year — no weather adjustment applied.';
+  const t = R.anchors.t.sum + S.tweak, r = R.anchors.r.sum;
+  const tp = t >= 0.4 ? 'warmer than normal' : t <= -0.4 ? 'cooler than normal' : 'near-normal temperatures';
+  const rp = r <= -0.4 ? 'drier than normal' : r >= 0.4 ? 'wetter than normal' : 'near-normal rainfall';
+  return cap(tp) + ' and ' + rp + ' expected this summer (' + signed(t, ' °C') + ').';
+}
+
+function renderBriefing(){
+  const loc = R.loc, C = R.C, Cn = R.Cn, st = R.stats, sn = R.statsN;
+  const dl = (t) => fmtT(t);
+  const frostFree = LIVE.clim && LIVE.clim.frostFree;
+  const dLsf = R.C.v.base.lsf - R.Cn.v.base.lsf, dFaf = R.C.v.base.faf - R.Cn.v.base.faf;
+  const dWarm = st.warmDays - sn.warmDays;
+  const shifts = shiftList();
+  const ms = R.soil;
+  const week = weekStrip();
+  const alert = coldAlert();
+  const outlookLine = S.outlook === 'auto' || S.outlook === 'elnino'
+    ? '<p class="src">' + esc(CURRENT_OUTLOOK.title) + '. ' + esc(CURRENT_OUTLOOK.enso) + '. ' + esc((CURRENT_OUTLOOK.groups[R.grp] || {}).blurb || '') + ' ' + esc(CURRENT_OUTLOOK.notes || '') + '</p>' + staleOutlook()
+    : '';
+  $('#briefing').innerHTML = `
+  <div class="brief-head">
+    <div>
+      <p class="eyebrow">Season briefing</p>
+      <h2>${esc(loc.name)}</h2>
+      <p class="lede">${esc(tempWords())}</p>
+    </div>
+    <div class="pills">
+      <span class="pill ${S.outlook === 'neutral' ? '' : 'on'}">${esc(S.outlook === 'neutral' ? 'Normal year' : OUTLOOK_PRESETS[S.outlook].label.split(' — ')[0])}</span>
+      <span class="pill ${LIVE.fc && S.useLive ? 'on' : ''}">${LIVE.fc && S.useLive ? 'Live forecast' : (LIVE.st.fc.s === 'loading' ? 'Loading forecast…' : 'Built-in climate')}</span>
+      ${S.protect !== 'none' ? '<span class="pill on">' + esc(PROTECTION[S.protect].label) + '</span>' : ''}
+    </div>
+  </div>
+  ${alert}
+  <div class="stats">
+    <div class="stat"><span class="k">Last spring frost</span><span class="v">${frostFree ? 'Rare' : dl(st.lsfT)}</span><span class="s">${frostFree ? 'effectively frost-free' : 'normally ' + dl(sn.lsfT) + (dLsf ? ' · ' + Math.abs(dLsf) + ' days ' + (dLsf < 0 ? 'earlier' : 'later') : '')}</span></div>
+    <div class="stat"><span class="k">First autumn frost</span><span class="v">${frostFree ? 'Rare' : dl(st.fafT)}</span><span class="s">${frostFree ? 'protect only in cold snaps' : 'normally ' + dl(sn.fafT) + (dFaf ? ' · ' + Math.abs(dFaf) + ' days ' + (dFaf > 0 ? 'later' : 'earlier') : '')}</span></div>
+    <div class="stat"><span class="k">Warm-crop season</span><span class="v">${st.warmDays} days</span><span class="s">days averaging 14 °C+ · normally ${sn.warmDays}${dWarm ? ' (' + signed(dWarm) + ')' : ''}</span></div>
+    <div class="stat"><span class="k">Soil today</span><span class="v">${ms ? round1(ms.v) + ' °C' : '—'}</span><span class="s">${ms ? (ms.src === 'you' ? 'your reading' : 'forecast model, 6 cm') : 'enter a reading, or wait for live data'}</span></div>
+  </div>
+  <div class="chartbox">
+    <div class="legend"><span><i class="ln adj"></i>Expected mean temperature</span><span><i class="ln nor"></i>Normal</span><span><i class="ln thr"></i>14 °C — warm crops grow</span></div>
+    <div class="chart" id="tchart">${tempChart()}<div class="tip" id="tip" hidden></div></div>
+    <details class="tbl"><summary>Table view</summary>${monthTable()}</details>
+  </div>
+  ${week}
+  <div class="shifts"><h3>What the weather changes for your crops</h3>${shifts}</div>
+  ${outlookLine}
+  <p class="src">${loc.ms ? '<a href="https://www.metservice.com/towns-cities/locations/' + loc.ms + '" target="_blank" rel="noopener">MetService 7-day forecast for this area</a> · ' : '<a href="https://www.metservice.com/" target="_blank" rel="noopener">MetService</a> · '}Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0) · Seasonal outlook by <a href="https://niwa.co.nz/climate-and-weather/seasonal-climate-outlook" target="_blank" rel="noopener">NIWA / Earth Sciences NZ</a></p>`;
+  attachChartHover();
+}
+
+function staleOutlook(){
+  const age = Math.round((TODAY - Date.parse(CURRENT_OUTLOOK.updated + 'T00:00:00Z')) / DAY);
+  return age > 100 ? '<p class="warn">This built-in outlook is ' + age + ' days old — check NIWA for a newer one, or set your own nudge above.</p>' : '';
+}
+
+function coldAlert(){
+  if (!LIVE.fc || !S.useLive) return '';
+  const cold = LIVE.fc.days.filter(d => d.t >= 0 && d.t <= 6 && d.min != null && d.min <= 4);
+  const tender = R.plantings.some(p => CROP_BY_ID[p.cropId].warm && p.p <= OFF + 14);
+  if (!cold.length) return '';
+  const worst = cold.reduce((m, d) => d.min < m.min ? d : m, cold[0]);
+  const frost = worst.min <= 2;
+  return '<div class="alert"><b>' + (frost ? 'Frost risk this week' : 'Cold nights this week') + '.</b> Forecast low of ' + round1(worst.min) + ' °C on ' + fmtT(OFF + worst.t, true) + (cold.length > 1 ? ' (' + plural(cold.length, 'night') + ' at or below 4 °C)' : '') + '. ' + (tender ? 'Hold off planting out tender seedlings, or cover them overnight.' : 'Cover tender seedlings overnight.') + '</div>';
+}
+
+function weekStrip(){
+  if (!LIVE.fc || !S.useLive) return '';
+  const days = LIVE.fc.days.filter(d => d.t >= 0 && d.t <= 6);
+  if (!days.length) return '';
+  return '<div class="week" aria-label="Seven day forecast">' + days.map(d => {
+    const frost = d.min != null && d.min <= 4;
+    return '<div class="wd' + (frost ? ' cold' : '') + '"><span class="dn">' + (d.t === 0 ? 'Today' : DOW[dateOfT(OFF + d.t).getUTCDay()]) + '</span><span class="hi">' + Math.round(d.max) + '°</span><span class="lo">' + Math.round(d.min) + '°</span><span class="rn">' + (d.rain >= 0.5 ? round1(d.rain) + ' mm' : 'dry') + '</span></div>';
+  }).join('') + '</div>';
+}
+
+function shiftList(){
+  const rows = [];
+  Object.keys(R.sel).forEach(id => {
+    const c = CROP_BY_ID[id], a = R.plantings.filter(p => p.cropId === id), n = R.normalBy[id] || [];
+    if (!a.length && !n.length){ rows.push({ w: 0, c, html: '<b>' + esc(c.n) + '</b> won’t reach harvest here in the time you’ve chosen' + (S.protect === 'none' ? ' — try cloches or a greenhouse.' : '.') }); return; }
+    if (a.length && !n.length){ rows.push({ w: 100, c, html: '<b>' + esc(c.n) + '</b> becomes possible: plant ' + fmtT(a[0].p) + ' (a normal year wouldn’t give it enough warmth).', good: true }); return; }
+    if (!a.length && n.length){ rows.push({ w: 90, c, html: '<b>' + esc(c.n) + '</b> loses its window under this outlook.' }); return; }
+    const dr = a.length - n.length, dp = n[0].p - a[0].p, dm = n[0].m - a[0].m;
+    if (dr !== 0) rows.push({ w: 80 + Math.abs(dr), c, good: dr > 0, html: '<b>' + esc(c.n) + '</b>: ' + plural(a.length, 'round') + ' instead of ' + n.length + ' — ' + (dr > 0 ? 'the longer warm season fits an extra planting.' : 'the season is too short for the last round.') });
+    else if (Math.abs(dp) >= 3 || Math.abs(dm) >= 3) rows.push({ w: Math.max(Math.abs(dp), Math.abs(dm)), c, good: dm > 0, html: '<b>' + esc(c.n) + '</b>: ' + (Math.abs(dp) >= 3 ? 'plant ' + Math.abs(dp) + ' days ' + (dp > 0 ? 'earlier' : 'later') + ' (' + fmtT(a[0].p) + ')' : 'plant ' + fmtT(a[0].p)) + ', first harvest ' + Math.abs(dm) + ' days ' + (dm > 0 ? 'sooner' : 'later') + ' (' + fmtT(a[0].m) + ').' });
+  });
+  if (!rows.length) return '<p class="muted">For your current crops the outlook doesn’t move dates by more than a few days.</p>';
+  rows.sort((x, y) => y.w - x.w);
+  return '<ul class="shiftlist">' + rows.slice(0, 8).map(r => '<li class="' + (r.good ? 'good' : '') + '">' + sw(r.c) + '<span>' + r.html + '</span></li>').join('') + '</ul>';
+}
+
+/* temperature chart */
+let CH = null;
+function tempChart(){
+  const W = 680, H = 230, ml = 34, mr = 12, mt = 12, mb = 26;
+  const a = R.C.v.base.air, b = R.Cn.v.base.air, N = 365;
+  let lo = 99, hi = -99; for (let i = 0; i < N; i++){ lo = Math.min(lo, a[OFF+i], b[OFF+i]); hi = Math.max(hi, a[OFF+i], b[OFF+i]); }
+  lo = Math.floor(lo / 5) * 5 - 0; hi = Math.ceil(hi / 5) * 5;
+  const x = i => ml + i / N * (W - ml - mr), y = v => mt + (1 - (v - lo) / (hi - lo)) * (H - mt - mb);
+  CH = { W, H, ml, mr, mt, mb, N, x, y, lo, hi };
+  let ticks = '', grid = '';
+  for (let v = lo; v <= hi; v += 5) grid += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(v) + '" y2="' + y(v) + '" class="gl"/><text x="' + (ml - 6) + '" y="' + (y(v) + 3.5) + '" class="ax" text-anchor="end">' + v + '°</text>';
+  for (let i = 0; i < N; i++){ const d = dateOfT(OFF + i); if (d.getUTCDate() === 1) ticks += '<text x="' + x(i) + '" y="' + (H - 8) + '" class="ax" text-anchor="middle">' + MONTHS[d.getUTCMonth()] + '</text>'; }
+  let pa = '', pb = '', band = '';
+  for (let i = 0; i < N; i += 2){ pa += (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(a[OFF+i]).toFixed(1); pb += (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(b[OFF+i]).toFixed(1); }
+  band = pa; for (let i = N - (N % 2 ? 1 : 2); i >= 0; i -= 2) band += 'L' + x(i).toFixed(1) + ' ' + y(b[OFF+i]).toFixed(1); band += 'Z';
+  const y14 = y(14);
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Expected versus normal daily mean temperature over the next 12 months"><rect x="' + ml + '" y="' + mt + '" width="' + (W - ml - mr) + '" height="' + (H - mt - mb) + '" class="pl"/>' + grid + ticks +
+    '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y14 + '" y2="' + y14 + '" class="thr"/>' +
+    '<path d="' + band + '" class="band"/><path d="' + pb + '" class="nor"/><path d="' + pa + '" class="adj"/>' +
+    '<line id="cx" x1="0" x2="0" y1="' + mt + '" y2="' + (H - mb) + '" class="cx" style="display:none"/>' +
+    '<circle id="cda" r="4" class="cda" style="display:none"/></svg>';
+}
+function attachChartHover(){
+  const box = $('#tchart'); if (!box || !CH) return;
+  const svg = box.querySelector('svg'), tip = $('#tip'), cx = $('#cx'), cda = $('#cda');
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * CH.W;
+    let i = Math.round((px - CH.ml) / (CH.W - CH.ml - CH.mr) * CH.N); i = clamp(i, 0, CH.N - 1);
+    const va = R.C.v.base.air[OFF+i], vb = R.Cn.v.base.air[OFF+i];
+    cx.setAttribute('x1', CH.x(i)); cx.setAttribute('x2', CH.x(i)); cx.style.display = '';
+    cda.setAttribute('cx', CH.x(i)); cda.setAttribute('cy', CH.y(va)); cda.style.display = '';
+    tip.hidden = false; tip.innerHTML = '<b>' + fmtT(OFF + i, true) + '</b><br>Expected ' + round1(va) + ' °C<br>Normal ' + round1(vb) + ' °C<br><span class="d">' + signed(va - vb, ' °C') + '</span>';
+    const left = clamp(CH.x(i) / CH.W * r.width + 10, 0, r.width - 130);
+    tip.style.left = left + 'px'; tip.style.top = '8px';
+  };
+  const leave = () => { tip.hidden = true; cx.style.display = 'none'; cda.style.display = 'none'; };
+  svg.addEventListener('pointermove', move); svg.addEventListener('pointerleave', leave);
+}
+function monthTable(){
+  const rows = []; const seen = {};
+  for (let i = 0; i < 365; i++){ const d = dateOfT(OFF + i), k = d.getUTCFullYear() * 12 + d.getUTCMonth(); const e = seen[k] || (seen[k] = { label: MONTHS[d.getUTCMonth()] + ' ' + String(d.getUTCFullYear()).slice(2), a: 0, b: 0, n: 0 }); e.a += R.C.v.base.air[OFF+i]; e.b += R.Cn.v.base.air[OFF+i]; e.n++; }
+  Object.keys(seen).forEach(k => rows.push(seen[k]));
+  return '<div class="scrollx"><table class="t"><thead><tr><th>Month</th><th class="num">Normal (°C)</th><th class="num">Expected (°C)</th><th class="num">Difference</th></tr></thead><tbody>' +
+    rows.map(e => '<tr><td>' + e.label + '</td><td class="num">' + round1(e.b / e.n) + '</td><td class="num">' + round1(e.a / e.n) + '</td><td class="num">' + signed((e.a - e.b) / e.n) + '</td></tr>').join('') + '</tbody></table></div>';
+}
+
+/* ---------------- crop picker ---------------- */
+function coldHold(c){
+  if (!c.warm || !LIVE.fc || !S.useLive) return false;
+  return LIVE.fc.days.some(d => d.t >= 0 && d.t <= 4 && d.min != null && d.min <= 4);
+}
+function cropNow(c){
+  const f = firstFeasible(R.C, c, S.hor);
+  if (!f){
+    const fc = R.Cc && firstFeasible(R.Cc, c, S.hor);
+    return fc ? { k: 'cover', t: 'needs cloches' } : { k: 'no', t: 'not viable here' };
+  }
+  if (f.p <= OFF + 3) return coldHold(c) ? { k: 'hold', t: 'hold — cold snap' } : { k: 'now', t: 'plant now' };
+  return { k: 'later', t: 'from ' + fmtT(f.p) };
+}
+function renderCrops(){
+  const groups = Object.keys(GROUPS).sort((a, b) => GROUPS[a].slot - GROUPS[b].slot);
+  const picker = groups.map(g => '<div class="cg"><h4><i class="sw" style="background:var(--g' + GROUPS[g].slot + ')"></i>' + GROUPS[g].name + '</h4><div class="chips">' +
+    CROPS.filter(c => c.g === g).map(c => { const on = S.sel[c.id] > 0, n = cropNow(c);
+      return '<button type="button" class="chip crop ' + (on ? 'on' : '') + ' k-' + n.k + '" data-act="toggle" data-id="' + c.id + '" aria-pressed="' + on + '"><span>' + esc(c.n) + '</span><small>' + esc(n.t) + '</small></button>'; }).join('') + '</div></div>').join('');
+  const sel = Object.keys(S.sel).filter(id => S.sel[id] > 0 && CROP_BY_ID[id]);
+  const rowsHtml = sel.map(id => {
+    const c = CROP_BY_ID[id], n = S.sel[id], rounds = R.plantings.filter(p => p.cropId === id).length;
+    const area = n / c.pm;
+    return '<div class="yc"><span class="nm">' + sw(c) + esc(c.n) + '</span>' +
+      '<span class="stp"><button type="button" class="btn ic" data-act="dec" data-id="' + id + '" aria-label="Fewer ' + esc(c.n) + '">−</button><input type="number" min="1" max="999" value="' + n + '" data-bind="plants" data-id="' + id + '" aria-label="Number of ' + esc(c.n) + ' ' + (c.per || 'per round') + '"><button type="button" class="btn ic" data-act="inc" data-id="' + id + '" aria-label="More ' + esc(c.n) + '">+</button></span>' +
+      '<span class="meta">' + (c.per || 'per round') + ' · ' + round1(area) + ' m²</span>' +
+      '<span class="rd ' + (rounds ? '' : 'no') + '">' + (rounds ? plural(rounds, 'planting') : 'no window') + '</span>' +
+      '<button type="button" class="btn ic x" data-act="remove" data-id="' + id + '" aria-label="Remove ' + esc(c.n) + '">×</button></div>';
+  }).join('');
+  const over = R.packed.overflow.length;
+  $('#crops').innerHTML = `
+  <div class="sec-head"><div><p class="eyebrow">What to grow</p><h2>Pick your crops</h2></div>
+    <div class="acts"><button class="btn" data-act="starter" type="button">Summer starter set</button><button class="btn" data-act="clear" type="button">Clear</button></div></div>
+  <p class="muted">The tag on each crop is where it stands <em>right now</em> for your area, weather and protection. Tap to add or remove.</p>
+  <div class="picker">${picker}</div>
+  <h3 class="yc-h">Your crops <span class="muted">${sel.length ? '· quantities are per round / per sowing' : ''}</span></h3>
+  <div class="ycs">${rowsHtml || '<p class="muted">Nothing selected yet — pick a few crops above.</p>'}</div>
+  <p class="fit ${over ? 'bad' : ''}">${fitLine(over)}</p>`;
+}
+function fitLine(over){
+  const u = R.peak;
+  const base = 'You have about <b>' + round1(R.growArea) + ' m²</b> of growing space. At its busiest (' + fmtT(u.t) + ') your plan uses <b>' + round1(u.used) + ' m²</b> (' + Math.round(u.pct * 100) + '%).';
+  if (S.fit && R.scale < 1) return base + ' Plant numbers are scaled to ' + Math.round(R.scale * 100) + '% so everything fits. <button class="lnk" data-act="unfit" type="button">Use my numbers instead</button>';
+  if (over) return '<b>' + plural(over, 'planting') + ' won’t fit</b> in your space. <button class="lnk" data-act="fit" type="button">Shrink plant numbers to fit</button> or make the garden bigger. ' + base;
+  return base;
+}
+
+/* ---------------- results ---------------- */
+function renderResults(){
+  const tabs = [['calendar', 'Calendar'], ['layout', 'Garden layout'], ['shop', 'Shopping list'], ['track', 'Tracker']];
+  const nav = '<div class="tabs" role="tablist">' + tabs.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + '</button>').join('') + '</div>';
+  let body = '';
+  if (!R.packed.items.length) body = Object.keys(R.sel).length
+    ? '<div class="empty"><h3>No planting windows found</h3><p>None of your crops can reach harvest here in the time you’ve chosen. Try cloches or a greenhouse under <b>Growing setup</b>, a longer plan, or different crops.</p></div>'
+    : '<div class="empty"><h3>Nothing to schedule yet</h3><p>Pick some crops above and your plan appears here.</p></div>';
+  else if (S.tab === 'calendar') body = tabCalendar();
+  else if (S.tab === 'layout') body = tabLayout();
+  else if (S.tab === 'shop') body = tabShop();
+  else body = tabTrack();
+  $('#results').innerHTML = nav + '<div class="tabbody" role="tabpanel">' + body + '</div>';
+  if (S.tab === 'layout' && (R.placed.length || R.packed.items.length)) renderBeds();
+}
+
+/* ---- calendar ---- */
+function eventNote(e){
+  const c = CROP_BY_ID[e.cropId];
+  if (e.kind === 'plant' && coldHold(c) && e.t <= OFF + 6) return '<span class="tag warn">cold snap forecast — hold or cover</span>';
+  if (e.kind === 'sow' && e.t < OFF) return '<span class="tag">too late to raise from seed — buy seedlings</span>';
+  return '';
+}
+function agenda(){
+  const from = OFF - 21, to = OFF + 45;
+  const evs = R.ev.filter(e => e.t >= from && e.t <= to && e.kind !== 'harvest' || (e.kind === 'harvest' && e.t >= OFF && e.t <= to));
+  const done = e => { const p = S.prog[e.key]; return p && ((e.kind === 'plant' && (p.s >= 1 || p.a)) || (e.kind === 'sow' && (p.s >= 1 || p.a))); };
+  if (!evs.length) return '<p class="muted">Nothing due in the next six weeks.</p>';
+  return '<ul class="agenda">' + evs.slice(0, 16).map(e => {
+    const c = CROP_BY_ID[e.cropId], d = done(e), late = e.t < OFF && !d && e.kind === 'plant';
+    return '<li class="' + (d ? 'done' : '') + (late ? ' late' : '') + '">' +
+      (e.kind === 'plant' ? '<input type="checkbox" ' + (d ? 'checked' : '') + ' data-act="donePlant" data-key="' + esc(e.key) + '" data-t="' + e.t + '" aria-label="Mark ' + esc(e.text) + ' as done">' : '<span class="nb"></span>') +
+      '<span class="dt">' + fmtT(e.t, true) + '</span><span class="tx">' + sw(c) + esc(cap(e.text)) + (e.r ? ' <em>(round ' + (e.r + 1) + ')</em>' : '') + '</span>' + eventNote(e) + (late ? '<span class="tag warn">overdue</span>' : '') + '</li>';
+  }).join('') + '</ul>';
+}
+function tabCalendar(){
+  return '<div class="two"><div><h3>Next six weeks</h3>' + agenda() + '</div><div class="legendbox"><h3>Reading the calendar</h3><p class="lg"><span class="key nur"></span> raising seedlings</p><p class="lg"><span class="key grow"></span> growing</p><p class="lg"><span class="key harv"></span> harvesting</p><p class="lg"><span class="key harv caution"></span> hot-spell risk at harvest</p><p class="lg"><span class="key noroom"></span> doesn’t fit your space</p><p class="muted">Tap any bar for the detail, weather notes and to log what you actually planted.</p></div></div>' + gantt() + detailPanel();
+}
+function gantt(){
+  const t0 = OFF - (dateOfT(OFF).getUTCDate() - 1), t1 = t0 + Math.min(S.hor + 75, 540), span = t1 - t0;
+  const P = t => clamp((t - t0) / span * 100, 0, 100);
+  /* month header + grid */
+  let head = '', grid = '';
+  for (let t = t0; t < t1; t++){ const d = dateOfT(t); if (d.getUTCDate() === 1){ let nt = t + 1; while (nt < t1 && dateOfT(nt).getUTCDate() !== 1) nt++;
+    head += '<span class="mh" style="left:' + P(t) + '%;width:' + (P(nt) - P(t)) + '%">' + MONTHS[d.getUTCMonth()] + (d.getUTCMonth() === 0 ? ' ' + String(d.getUTCFullYear()).slice(2) : '') + '</span>'; grid += '<span class="gd" style="left:' + P(t) + '%"></span>'; } }
+  const byCrop = {}; R.packed.items.forEach(it => (byCrop[it.cropId] || (byCrop[it.cropId] = [])).push(it));
+  const ids = Object.keys(byCrop).sort((a, b) => GROUPS[CROP_BY_ID[a].g].slot - GROUPS[CROP_BY_ID[b].g].slot || byCrop[a][0].p - byCrop[b][0].p);
+  const rows = ids.map(id => {
+    const c = CROP_BY_ID[id], items = byCrop[id].slice().sort((a, b) => a.p - b.p);
+    const lanes = [];
+    const bars = items.map(it => {
+      const s0 = it.p - c.nur * 7; let lane = 0; while (lanes[lane] != null && lanes[lane] > s0) lane++; lanes[lane] = it.end + 1;
+      const seg = (a, b) => [clamp(a, t0, t1), clamp(b, t0, t1)];
+      const [ba, bb] = seg(s0, it.end); if (bb <= ba) return '';
+      const tot = bb - ba, w = (a, b) => { const [x, y] = seg(a, b); return Math.max(0, (y - x) / tot * 100); };
+      const cls = (it.status === 'caution' ? ' caution' : '') + (it.x == null ? ' noroom' : '') + (S.focus === it.key ? ' sel' : '');
+      const label = fmtT(it.p) + ' → first harvest ' + fmtT(it.m) + (it.x == null ? ' (no room)' : '');
+      return '<button type="button" class="bar' + cls + '" data-act="pick" data-key="' + esc(it.key) + '" style="--c:var(--g' + GROUPS[c.g].slot + ');left:' + P(ba) + '%;width:' + (P(bb) - P(ba)) + '%;top:' + (lane * 18 + 5) + 'px" title="' + esc(c.n + ': ' + label) + '" aria-label="' + esc(c.n + ' round ' + (it.r + 1) + ': ' + label) + '">' +
+        '<span class="s nur" style="width:' + w(s0, it.p) + '%"></span><span class="s grow" style="width:' + w(it.p, it.m) + '%"></span><span class="s harv" style="width:' + w(it.m, it.end) + '%"></span></button>';
+    }).join('');
+    const h = Math.max(30, lanes.length * 18 + 10);
+    return '<div class="gr"><div class="gl2">' + sw(c) + '<span>' + esc(c.n) + '<small>' + (byCrop[id].length > 1 ? plural(byCrop[id].length, c.mode === 'stag' ? 'sowing' : 'round') : '') + '</small></span></div><div class="gt" style="height:' + h + 'px">' + bars + '</div></div>';
+  }).join('');
+  return '<div class="gantt-wrap"><div class="gantt" style="--td:' + P(OFF) + '"><div class="gh"><div class="gl2"></div><div class="gt hd">' + head + '</div></div><div class="ggrid">' + grid + '</div>' + rows + '<div class="today"><span>Today</span></div></div></div>';
+}
+function notesFor(it){
+  const c = CROP_BY_ID[it.cropId], out = [];
+  if (S.outlook !== 'neutral'){
+    const rs = seasonalAnom(R.C.doy[Math.min(it.m, R.C.N - 1)], R.anchors.r);
+    if (rs <= -0.4 && c.water >= 2) out.push('Drier than normal expected while it grows — plan on extra watering and mulch (roughly ' + Math.round((R.rainMult - 1) * 100) + '% more than usual).');
+    if (rs >= 0.4 && ['tomato','cherry','cucumber','zucchini','pumpkin','onion','garlic','rockmelon'].indexOf(c.id) >= 0) out.push('Wetter than normal expected — watch for blight and mildew; water at the base and give plants air.');
+    const mo = R.C.month[it.p];
+    if ((S.outlook === 'auto' || S.outlook === 'elnino') && /wind/i.test(CURRENT_OUTLOOK.notes || '') && mo >= 8 && mo <= 11 && ['tomato','cherry','corn','cbean','capsicum','eggplant','cucumber'].indexOf(c.id) >= 0)
+      out.push('A windy spring is expected — stake early and shelter young plants.');
+  }
+  const n = (R.normalBy[c.id] || [])[it.r];
+  if (c.warm && n && n.p - it.p >= 4 && it.status !== 'actual') out.push('About ' + (n.p - it.p) + ' days earlier than in a normal year — keep frost cloth or cloches handy for cold snaps' + (/cold outbreak/i.test(CURRENT_OUTLOOK.notes || '') && S.outlook !== 'neutral' ? ' (NIWA expects occasional cold outbreaks this spring)' : '') + '.');
+  if (it.flag === 'heat') out.push('Hot-spell risk around harvest — use shade cloth and a heat-tolerant variety.');
+  if (it.flag === 'unfinished') out.push('At your actual planting date it may not finish before the season ends — consider cloches.');
+  if (c.tip) out.push(c.tip);
+  return out;
+}
+function detailPanel(){
+  const it = R.packed.items.find(i => i.key === S.focus); if (!it) return '<p class="muted pickhint">Select a bar above for dates, weather notes and companion planting.</p>';
+  const c = CROP_BY_ID[it.cropId], n = (R.normalBy[c.id] || [])[it.r];
+  const prog = S.prog[it.key] || {};
+  const dm = n ? n.m - it.m : 0;
+  return '<div class="detail"><div class="dh">' + sw(c) + '<h3>' + esc(c.n) + (it.r ? ' <em>round ' + (it.r + 1) + '</em>' : '') + '</h3><button type="button" class="btn ic x" data-act="unpick" aria-label="Close">×</button></div>' +
+    '<dl class="dl"><div><dt>' + (c.nur ? 'Raise seedlings' : 'Get ready') + '</dt><dd>' + (c.nur ? fmtT(it.p - c.nur * 7, true) + ' (' + c.nur + ' weeks before planting out)' : '—') + '</dd></div>' +
+    '<div><dt>' + (c.kind === 'direct' ? 'Sow' : 'Plant') + '</dt><dd>' + fmtT(it.p, true) + (it.status === 'actual' ? ' <em>(your date)</em>' : '') + '</dd></div>' +
+    '<div><dt>First harvest</dt><dd>' + fmtT(it.m, true) + ' · ' + it.days + ' days' + (n && Math.abs(dm) >= 2 ? ' <em>(' + Math.abs(dm) + ' days ' + (dm > 0 ? 'sooner' : 'later') + ' than a normal year)</em>' : '') + '</dd></div>' +
+    '<div><dt>Harvest window</dt><dd>' + fmtT(it.m) + ' – ' + fmtT(it.end) + '</dd></div>' +
+    '<div><dt>Quantity</dt><dd>' + it.plants + ' plants · ' + round1(it.area) + ' m² · ~' + round1(it.plants * c.kg) + ' kg</dd></div>' +
+    '<div><dt>Spacing</dt><dd>' + esc(c.sp) + '</dd></div>' +
+    (c.comp && c.comp !== '—' ? '<div><dt>Good neighbours</dt><dd>' + esc(c.comp) + '</dd></div>' : '') + (c.avoid && c.avoid !== '—' ? '<div><dt>Keep apart from</dt><dd>' + esc(c.avoid) + '</dd></div>' : '') + '</dl>' +
+    '<ul class="notes">' + notesFor(it).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' +
+    '<div class="log"><label class="fld" for="act-' + esc(it.key) + '">I actually ' + (c.kind === 'direct' ? 'sowed' : 'planted') + ' this on</label><input id="act-' + esc(it.key) + '" type="date" value="' + (prog.a || '') + '" data-bind="actual" data-key="' + esc(it.key) + '"><small class="muted">The harvest window and any follow-on rounds recalculate from your date and the weather.</small></div></div>';
+}
+
+/* ---- layout ---- */
+function tabLayout(){
+  const tmax = OFF + S.hor + 30;
+  if (S.viewT == null || S.viewT < OFF || S.viewT > tmax) S.viewT = R.peak.t;
+  const fill = fillers();
+  return '<div class="viewer"><label class="fld" for="vt">View the garden on <b id="vtOut">' + fmtTY(S.viewT) + '</b></label><input id="vt" type="range" min="' + OFF + '" max="' + tmax + '" step="1" value="' + S.viewT + '" data-bind="viewT"><div class="scale"><span>' + fmtT(OFF) + '</span><span>busiest: ' + fmtT(R.peak.t) + '</span><span>' + fmtT(tmax) + '</span></div></div>' +
+    '<div id="bedsBox"></div>' + utilChart() + fill;
+}
+const BED_MAXLEN = 3;
+function renderBeds(){
+  const box = $('#bedsBox'); if (!box) return;
+  const vt = S.viewT, Ltot = R.Ltot, bw = S.bedW;
+  const nB = Math.max(1, Math.ceil(Ltot / BED_MAXLEN - 1e-6)), bl = Ltot / nB;
+  const cols = nB <= 2 ? nB : nB <= 6 ? 2 : nB <= 12 ? 3 : 4, rows = Math.ceil(nB / cols);
+  const U = 100, gap = 0.55, pad = 0.15;
+  const Wm = cols * bl + (cols - 1) * gap + pad * 2, Hm = rows * bw + (rows - 1) * gap + pad * 2;
+  const active = R.placed.filter(it => it.p <= vt && vt < it.end);
+  let svg = '';
+  for (let b = 0; b < nB; b++){
+    const cx = pad + (b % cols) * (bl + gap), cy = pad + Math.floor(b / cols) * (bw + gap);
+    svg += '<rect class="bed" x="' + cx * U + '" y="' + cy * U + '" width="' + bl * U + '" height="' + bw * U + '" rx="6"/>';
+    const lo = b * bl, hi = lo + bl;
+    for (const it of active){
+      const a = Math.max(it.x, lo), z = Math.min(it.x + it.len, hi);
+      if (z - a <= 1e-6) continue;
+      const c = CROP_BY_ID[it.cropId], w = (z - a) * U;
+      svg += '<g><rect class="seg" x="' + (cx + a - lo) * U + '" y="' + cy * U + '" width="' + w + '" height="' + bw * U + '" rx="4" style="fill:var(--g' + GROUPS[c.g].slot + ')"><title>' + esc(c.n + ' — ' + it.plants + ' plants, ' + round1(it.area) + ' m²') + '</title></rect>';
+      if (w > 46) svg += '<text class="segt" x="' + ((cx + a - lo) * U + w / 2) + '" y="' + (cy * U + bw * U / 2 + 4) + '" text-anchor="middle">' + esc(w > 96 ? c.n : c.n.split(' ')[0]) + '</text>';
+      svg += '</g>';
+    }
+  }
+  const usedNow = active.reduce((s, i) => s + i.area, 0);
+  const legend = Array.from(new Set(active.map(i => i.cropId))).map(id => { const c = CROP_BY_ID[id]; const its = active.filter(i => i.cropId === id); return '<li>' + sw(c) + '<span>' + esc(c.n) + '</span><em>' + its.reduce((s, i) => s + i.plants, 0) + ' plants · ' + round1(its.reduce((s, i) => s + i.area, 0)) + ' m²</em></li>'; }).join('');
+  box.innerHTML = '<div class="bedsvg"><svg viewBox="0 0 ' + Wm * U + ' ' + Hm * U + '" role="img" aria-label="Bed layout on ' + fmtTY(vt) + '">' + svg + '</svg></div>' +
+    '<p class="muted">' + plural(nB, 'bed') + ' about ' + round1(bl) + ' m × ' + bw + ' m (schematic — crops keep the same spot for their whole life). On this date <b>' + round1(usedNow) + ' m²</b> of ' + round1(R.growArea) + ' m² is in use (' + Math.round(usedNow / R.growArea * 100) + '%).</p>' +
+    '<ul class="lgd">' + (legend || '<li class="muted">Nothing is in the ground on this date.</li>') + '</ul>';
+}
+function utilChart(){
+  const u = R.util, W = 680, H = 140, ml = 34, mr = 12, mt = 8, mb = 22;
+  const t0 = u[0].t, t1 = u[u.length - 1].t + 7, x = t => ml + (t - t0) / (t1 - t0) * (W - ml - mr), y = p => mt + (1 - p) * (H - mt - mb);
+  let bars = '', ax = '';
+  const bw = (W - ml - mr) / u.length;
+  u.forEach(s => { const h = Math.min(1, s.pct) * (H - mt - mb); bars += '<rect x="' + (x(s.t) + 0.5) + '" y="' + (H - mb - h) + '" width="' + Math.max(1, bw - 1) + '" height="' + h + '" class="ub" rx="2"><title>' + fmtT(s.t) + ': ' + round1(s.used) + ' m² in use (' + Math.round(s.pct * 100) + '%)</title></rect>'; });
+  [0, 0.5, 1].forEach(p => ax += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(p) + '" y2="' + y(p) + '" class="gl"/><text x="' + (ml - 6) + '" y="' + (y(p) + 3.5) + '" class="ax" text-anchor="end">' + Math.round(p * 100) + '%</text>');
+  for (let t = t0; t < t1; t++){ if (dateOfT(t).getUTCDate() === 1) ax += '<text x="' + x(t) + '" y="' + (H - 6) + '" class="ax" text-anchor="middle">' + MONTHS[dateOfT(t).getUTCMonth()] + '</text>'; }
+  const cur = '<line x1="' + x(S.viewT) + '" x2="' + x(S.viewT) + '" y1="' + mt + '" y2="' + (H - mb) + '" class="cx"/>';
+  return '<div class="util"><h3>How much of your space is in use</h3><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Share of growing space in use each week">' + ax + bars + cur + '</svg><p class="muted">Low bars are free space — good moments for a follow-on crop.</p></div>';
+}
+function fillers(){
+  if (!R.growArea) return '';
+  const selIds = Object.keys(R.sel), cands = [];
+  CROPS.forEach(c => {
+    if (R.sel[c.id]) return;
+    const pl = planCrop(R.C, c, { succ: false, hor: S.hor })[0]; if (!pl) return;
+    const sel2 = Object.assign({}, R.sel); sel2[c.id] = c.def;
+    const all = R.plantings.concat([Object.assign({}, pl, { cropId: c.id, r: 0, key: c.id + '|0' })]);
+    const pk = packPlan(all, sel2, R.scale, R.Ltot, S.bedW);
+    if (pk.overflow.length) return;
+    const area = c.def / c.pm;
+    cands.push({ c, pl, area, kg: c.def * c.kg, score: pl.p * 1 - (c.def * c.kg / area) * 4 });
+  });
+  cands.sort((a, b) => a.score - b.score);
+  if (!cands.length) return '<div class="fill"><h3>Fill the gaps</h3><p class="muted">Your space is well used — no extra crops fit without squeezing something out.</p></div>';
+  return '<div class="fill"><h3>Fill the gaps</h3><p class="muted">Crops that fit into the free space in your plan, soonest first:</p><ul class="fl">' + cands.slice(0, 8).map(o => '<li>' + sw(o.c) + '<span class="fn"><b>' + esc(o.c.n) + '</b> — ' + (o.c.kind === 'direct' ? 'sow ' : 'plant ') + fmtT(o.pl.p) + ', first harvest ' + fmtT(o.pl.m) + ' <em>(' + o.c.def + ' plants, ' + round1(o.area) + ' m², ~' + round1(o.kg) + ' kg)</em></span><button type="button" class="btn" data-act="toggle" data-id="' + o.c.id + '">Add</button></li>').join('') + '</ul></div>';
+}
+
+/* ---- shopping ---- */
+function tabShop(){
+  const sh = R.shop, kg = sh.rows.reduce((s, r) => s + r.kg, 0);
+  const weekly = Math.round(R.peak.used * 25 * R.rainMult);
+  const over = R.packed.overflow.length;
+  return '<div class="tiles"><div class="tile"><span class="k">Expected harvest</span><span class="v">' + Math.round(kg) + ' kg</span><span class="s">over the whole plan, typical home-garden yields</span></div><div class="tile"><span class="k">Peak watering</span><span class="v">~' + weekly.toLocaleString('en-NZ') + ' L / week</span><span class="s">about ' + Math.round(25 * R.rainMult) + ' L per m² when it’s busiest' + (R.rainMult > 1.05 ? ' (dry season allowance)' : R.rainMult < 0.95 ? ' (wet season discount)' : '') + '</span></div><div class="tile"><span class="k">Space used at peak</span><span class="v">' + Math.round(R.peak.pct * 100) + '%</span><span class="s">' + round1(R.peak.used) + ' of ' + round1(R.growArea) + ' m²</span></div></div>' +
+    (over ? '<p class="warn">' + plural(over, 'planting') + ' that don’t fit your space are left off this list.</p>' : '') +
+    '<div class="scrollx"><table class="t shoptbl"><thead><tr><th>Crop</th><th class="num">Plants</th><th>Buy</th><th class="num">Harvest</th></tr></thead><tbody>' +
+    sh.rows.map(r => '<tr><td>' + sw(CROP_BY_ID[r.id]) + esc(r.name) + (r.rounds > 1 ? ' <em>× ' + r.rounds + ' rounds</em>' : '') + '</td><td class="num">' + r.plants + '</td><td>' + esc(r.buy) + '<br><small class="muted">' + esc(r.extra) + '</small></td><td class="num">~' + r.kg + ' kg</td></tr>').join('') + '</tbody></table></div>' +
+    '<h3>Supplies</h3><ul class="sup">' + sh.supplies.map(s => '<li><span>' + esc(s.name) + '</span><b>' + esc(String(s.qty)) + '</b></li>').join('') + '</ul>' +
+    '<div class="actions"><button class="btn" data-act="copyList" type="button">Copy list to clipboard</button><button class="btn" data-act="print" type="button">Print plan</button></div>';
+}
+
+/* ---- tracker ---- */
+const STAGES = ['Planned', 'In the ground', 'Harvesting', 'Finished'];
+function tabTrack(){
+  const items = R.packed.items.slice().sort((a, b) => a.p - b.p);
+  const done = items.filter(i => (S.prog[i.key] || {}).s === 3).length;
+  const inG = items.filter(i => { const s = (S.prog[i.key] || {}).s; return s === 1 || s === 2; }).length;
+  const rows = items.map(it => {
+    const c = CROP_BY_ID[it.cropId], p = S.prog[it.key] || { s: 0 };
+    return '<tr><td>' + sw(c) + esc(c.n) + (it.r ? ' <em>round ' + (it.r + 1) + '</em>' : '') + '</td><td>' + fmtT(it.p, true) + (it.status === 'actual' ? ' <em>(yours)</em>' : '') + '</td><td>' + fmtT(it.m) + ' – ' + fmtT(it.end) + '</td>' +
+      '<td><input type="date" value="' + (p.a || '') + '" data-bind="actual" data-key="' + esc(it.key) + '" aria-label="Actual planting date for ' + esc(c.n) + '"></td>' +
+      '<td><select data-bind="stage" data-key="' + esc(it.key) + '" aria-label="Status of ' + esc(c.n) + '">' + STAGES.map((s, i) => '<option value="' + i + '"' + ((p.s || 0) === i ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></td></tr>';
+  }).join('');
+  return '<div class="prog"><div class="bar2"><span style="width:' + (items.length ? Math.round(done / items.length * 100) : 0) + '%"></span></div><p><b>' + done + '</b> of ' + items.length + ' plantings finished · <b>' + inG + '</b> growing now</p></div>' +
+    '<p class="muted">Enter the date you actually planted something and the planner re-works the harvest window and any follow-on rounds from that date and the weather. Everything is saved in this browser.</p>' +
+    '<div class="scrollx"><table class="t"><thead><tr><th>Crop</th><th>Planned</th><th>Harvest window</th><th>Actual date</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="actions"><button class="btn" data-act="resetProg" type="button">Clear tracker</button></div>';
+}
+
+/* ---------------- main ---------------- */
+function renderMain(){
+  syncSidebar();
+  const sm = $('#sideSum'); if (sm) sm.textContent = 'Settings · ' + R.loc.name + ' · ' + round1(R.growArea) + ' m²';
+  $('#areaOut').innerHTML = 'About <b>' + round1(R.growArea) + ' m²</b> of growing space (' + round1(S.len * S.wid) + ' m² less paths).';
+  renderBriefing(); renderCrops(); renderResults();
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, id = el.dataset.id;
+  if (a === 'toggle'){ if (S.sel[id] > 0) delete S.sel[id]; else S.sel[id] = CROP_BY_ID[id].def; update(); }
+  else if (a === 'inc'){ S.sel[id] = (S.sel[id] || 0) + step(id); update(); }
+  else if (a === 'dec'){ S.sel[id] = Math.max(1, (S.sel[id] || 1) - step(id)); update(); }
+  else if (a === 'remove'){ delete S.sel[id]; update(); }
+  else if (a === 'starter'){ S.sel = Object.assign({}, STARTER); update(); }
+  else if (a === 'clear'){ S.sel = {}; update(); }
+  else if (a === 'tab'){ S.tab = el.dataset.t; renderResults(); saveState(); }
+  else if (a === 'pick'){ S.focus = el.dataset.key === S.focus ? null : el.dataset.key; renderResults(); const d = $('.detail'); if (d && S.focus) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); saveState(); }
+  else if (a === 'unpick'){ S.focus = null; renderResults(); }
+  else if (a === 'fit'){ S.fit = true; update(); }
+  else if (a === 'unfit'){ S.fit = false; update(); }
+  else if (a === 'size'){ S.len = +el.dataset.l; S.wid = +el.dataset.w; update(); }
+  else if (a === 'search') doSearch();
+  else if (a === 'pickPlace'){ const p = PLACES[+el.dataset.i]; if (p){ S.place = p; $('#placeRes').innerHTML = ''; $('#placeQ').value = ''; refreshLive(false); update(); } }
+  else if (a === 'refresh'){ refreshLive(true); refreshOutlook(); }
+  else if (a === 'donePlant'){ const key = el.dataset.key, t = +el.dataset.t; const p = S.prog[key] || (S.prog[key] = { s: 0 });
+    if (el.checked){ p.s = Math.max(p.s || 0, 1); p.a = isoOfT(Math.min(t, OFF)); } else { p.s = 0; delete p.a; } update(); }
+  else if (a === 'resetProg'){ if (confirm('Clear all tracker progress and actual dates?')){ S.prog = {}; update(); } }
+  else if (a === 'copyList') copyList(el);
+  else if (a === 'print') window.print();
+});
+function step(id){ const c = CROP_BY_ID[id]; return c.def >= 30 ? 10 : c.def >= 10 ? 2 : 1; }
+
+document.addEventListener('change', ev => {
+  const el = ev.target.closest('[data-bind]'); if (!el) return; bind(el, false);
+});
+document.addEventListener('input', ev => {
+  const el = ev.target.closest('[data-bind]'); if (!el) return;
+  if (el.dataset.bind === 'viewT' || el.dataset.bind === 'tweak') bind(el, true);
+});
+function bind(el, live){
+  const k = el.dataset.bind, v = el.type === 'checkbox' ? el.checked : el.value;
+  if (k === 'region'){ if (v === '__place') return; S.place = null; S.region = v; refreshLive(false); update(); return; }
+  if (k === 'plants'){ const n = Math.max(1, Math.min(999, parseInt(v, 10) || 1)); S.sel[el.dataset.id] = n; update(); return; }
+  if (k === 'viewT'){ S.viewT = +v; const o = $('#vtOut'); if (o) o.textContent = fmtTY(S.viewT); renderBeds(); const u = $('.util'); if (u) u.outerHTML = utilChart(); saveState(); return; }
+  if (k === 'actual'){ const p = S.prog[el.dataset.key] || (S.prog[el.dataset.key] = { s: 0 }); if (v) { p.a = v; p.s = Math.max(p.s || 0, 1); } else delete p.a; update(); return; }
+  if (k === 'stage'){ const p = S.prog[el.dataset.key] || (S.prog[el.dataset.key] = { s: 0 }); p.s = +v; update(); return; }
+  if (['len','wid','paths','bedW','tweak'].indexOf(k) >= 0){ const n = parseFloat(v); if (isNaN(n)) return; S[k] = n; if (k === 'tweak'){ $('#tweakOut').textContent = n === 0 ? 'none' : signed(n, ' °C'); if (live){ clearTimeout(bind.t); bind.t = setTimeout(update, 120); return; } } update(); return; }
+  if (k === 'hor'){ S.hor = +v; S.viewT = null; update(); return; }
+  if (k === 'soilNow'){ S.soilNow = v; update(); return; }
+  S[k] = v; if (k === 'outlook' || k === 'protect') S.viewT = null; update();
+}
+
+/* place search */
+let PLACES = [];
+async function doSearch(){
+  const q = $('#placeQ').value.trim(), out = $('#placeRes'); if (q.length < 2) return;
+  out.innerHTML = '<p class="hint">Searching…</p>';
+  try {
+    PLACES = await searchPlaces(q);
+    out.innerHTML = PLACES.length ? PLACES.map((p, i) => '<button type="button" class="pl" role="option" data-act="pickPlace" data-i="' + i + '"><b>' + esc(p.name) + '</b> <span>' + esc(p.admin) + '</span></button>').join('') : '<p class="hint">No NZ places found for that — try a nearby town.</p>';
+  } catch(e){
+    out.innerHTML = '<p class="hint">Place search needs a connection to Open-Meteo (' + esc(e.message) + '). You can still pick a region from the list.</p>';
+  }
+}
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.id === 'placeQ'){ ev.preventDefault(); doSearch(); } });
+
+function copyList(btn){
+  const lines = ['Total Garden Planner 4000 — shopping list (' + R.loc.name + ')', ''];
+  R.shop.rows.forEach(r => lines.push('• ' + r.name + ': ' + r.buy + ' (' + r.extra + ')'));
+  lines.push('', 'Supplies'); R.shop.supplies.forEach(s => lines.push('• ' + s.name + ': ' + s.qty));
+  const txt = lines.join('\n');
+  const done = () => { const o = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => btn.textContent = o, 1500); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, () => {}); else done();
+}
+
+/* ---------------- boot ---------------- */
+renderSidebar();
+renderStatus();
+update();
+refreshLive(false);
+refreshOutlook();
+
+</script>
+<script>
+/* header: date chip, theme toggle, mobile settings panel */
+(function(){
+  var d = new Date(TODAY); document.getElementById('today').textContent = DOW[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  var root = document.documentElement, btn = document.getElementById('themeBtn'), modes = ['auto','light','dark'], KEY = 'tgp4000.theme';
+  var cur = 'auto'; try { cur = localStorage.getItem(KEY) || 'auto'; } catch(e){}
+  function apply(){ if (cur === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', cur); btn.textContent = 'Theme: ' + cur; }
+  btn.addEventListener('click', function(){ cur = modes[(modes.indexOf(cur) + 1) % 3]; try { localStorage.setItem(KEY, cur); } catch(e){} apply(); });
+  apply();
+  var sw = document.getElementById('sideWrap'), mq = window.matchMedia('(min-width:980px)');
+  var firstVisit = true; try { firstVisit = !localStorage.getItem('tgp4000.v1'); } catch(e){}
+  function sync(){ sw.open = mq.matches || firstVisit; }
+  sync(); if (mq.addEventListener) mq.addEventListener('change', function(){ firstVisit = false; sync(); });
+})();
+</script>
+</body>
+</html>

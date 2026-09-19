@@ -1,0 +1,10 @@
+{
+  "name": "Total Garden Planner 4000",
+  "short_name": "Garden Planner",
+  "description": "Weather-aware vegetable garden planner for New Zealand.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f1f4ee",
+  "theme_color": "#1c6b54",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

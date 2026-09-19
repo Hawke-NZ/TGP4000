@@ -1,0 +1,98 @@
+{
+  "updated": "2026-09-02",
+  "title": "NIWA / Earth Sciences NZ seasonal outlook, Sep–Nov 2026 (issued 2 Sep 2026)",
+  "enso": "Very strong El Niño, expected to peak Nov–Dec 2026 and fade by Apr–May 2027",
+  "notes": "Windy, changeable spring with occasional cold outbreaks despite the warm tilt. Drier than normal north and east; wetter in the south-west.",
+  "groups": {
+    "north": {
+      "t": {
+        "spr": 0.5,
+        "sum": 0.6,
+        "aut": 0.3,
+        "win": 0.1
+      },
+      "r": {
+        "spr": -1,
+        "sum": -1,
+        "aut": -0.5,
+        "win": 0
+      },
+      "blurb": "Warmer than normal (about 50% chance above average) and drier than normal (about 50% chance below)."
+    },
+    "central": {
+      "t": {
+        "spr": 0.3,
+        "sum": 0.3,
+        "aut": 0.2,
+        "win": 0
+      },
+      "r": {
+        "spr": -0.6,
+        "sum": -0.6,
+        "aut": -0.3,
+        "win": 0
+      },
+      "blurb": "Near or above average temperatures; rainfall near or below normal."
+    },
+    "east": {
+      "t": {
+        "spr": 0.5,
+        "sum": 0.7,
+        "aut": 0.3,
+        "win": 0.1
+      },
+      "r": {
+        "spr": -1,
+        "sum": -1,
+        "aut": -0.5,
+        "win": 0
+      },
+      "blurb": "Warmer than normal (about 50% chance above) and drier (about 50% chance below normal rainfall)."
+    },
+    "nelson": {
+      "t": {
+        "spr": 0.2,
+        "sum": 0.4,
+        "aut": 0.2,
+        "win": 0
+      },
+      "r": {
+        "spr": -0.5,
+        "sum": -0.7,
+        "aut": -0.3,
+        "win": 0
+      },
+      "blurb": "Near or above average temperatures; rainfall below or near normal."
+    },
+    "southwest": {
+      "t": {
+        "spr": 0,
+        "sum": -0.3,
+        "aut": 0,
+        "win": 0
+      },
+      "r": {
+        "spr": 1,
+        "sum": 0.6,
+        "aut": 0.3,
+        "win": 0
+      },
+      "blurb": "Near average temperatures; wetter than normal (about 60% chance above)."
+    },
+    "canterbury": {
+      "t": {
+        "spr": 0.3,
+        "sum": 0.5,
+        "aut": 0.2,
+        "win": 0
+      },
+      "r": {
+        "spr": -0.6,
+        "sum": -0.8,
+        "aut": -0.4,
+        "win": 0
+      },
+      "blurb": "Above or near average temperatures; rainfall below or near normal."
+    }
+  }
+}
