@@ -1,46 +1,27 @@
 /* ============================================================
-   UI CORE — state, persistence, live-data orchestration, compute()
+   UI CORE — current garden, live-data orchestration, compute()
    ============================================================ */
 'use strict';
 const $  = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 const TODAY = nzToday();
-const LS_KEY = 'tgp4000.v1';
 
-const STARTER = { tomato:4, capsicum:3, zucchini:2, cucumber:3, corn:12, dbean:24, lettuce:6, basil:4, carrot:60 };
-
-const DEFAULTS = {
-  region: 'pukekohe', place: null,
-  len: 6, wid: 4, paths: 20, bedW: 1.2,
-  outlook: 'auto', tweak: 0, rain: 'auto', protect: 'none',
-  hor: 365, succ: true, fit: false, useLive: true, soilNow: '',
-  sel: Object.assign({}, STARTER),
-  prog: {}, tab: 'calendar', viewT: null, focus: null
-};
-let S = loadState();
-
-function loadState(){
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw){ const o = JSON.parse(raw); return Object.assign({}, DEFAULTS, o, { sel: o.sel || Object.assign({}, STARTER), prog: o.prog || {} }); }
-  } catch(e){}
-  return JSON.parse(JSON.stringify(DEFAULTS));
-}
-let saveTimer = null;
-function saveState(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){} }, 250);
-}
+STORE = loadStore();
+rebuildCrops();
+/* S is always the garden you're looking at */
+let S = curGarden();
+function saveState(){ saveStore(); }
 
 /* ---------- date helpers (timeline index t; today = OFF) ---------- */
 function dateOfT(t){ return new Date(TODAY + (t - OFF) * DAY); }
-function fmtT(t, withDow){ const d = dateOfT(t); return (withDow ? DOW[d.getUTCDay()] + ' ' : '') + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]; }
+function fmtT(t, withDow){ const d = dateOfT(t); return (withDow ? DOW[d.getUTCDay()] + ' ' : '') + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + (Math.abs(t - OFF) > 330 ? ' ' + d.getUTCFullYear() : ''); }
 function fmtTY(t){ const d = dateOfT(t); return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
 function isoOfT(t){ return isoOfMs(TODAY + (t - OFF) * DAY); }
+function tOfIso(s){ return Math.round((Date.parse(s + 'T00:00:00Z') - TODAY) / DAY) + OFF; }
 
 /* ---------- location ---------- */
 function resolveLocation(){
@@ -53,29 +34,31 @@ function resolveLocation(){
 }
 
 /* ---------- live data ---------- */
-const LIVE = { key: null, fc: null, clim: null, st: { fc: { s:'idle' }, clim: { s:'idle' }, outlook: { s:'idle' } }, token: 0 };
+const LIVE = { key: null, fc: null, clim: null, season: null, st: { fc: { s:'idle' }, clim: { s:'idle' }, season: { s:'idle' }, outlook: { s:'idle' } }, token: 0 };
 let CURRENT_OUTLOOK = OUTLOOK;
 
 async function refreshLive(force){
   const loc = resolveLocation();
   const key = loc.lat.toFixed(2) + ',' + loc.lon.toFixed(2);
   if (!force && LIVE.key === key) return;
-  LIVE.key = key; LIVE.fc = null; LIVE.clim = null; const tok = ++LIVE.token;
-  LIVE.st.fc = { s:'loading' }; LIVE.st.clim = { s:'loading' };
+  LIVE.key = key; LIVE.fc = null; LIVE.clim = null; LIVE.season = null; const tok = ++LIVE.token;
+  LIVE.st.fc = { s:'loading' }; LIVE.st.clim = { s:'loading' }; LIVE.st.season = { s:'loading' };
   renderStatus();
 
-  const fcKey = 'tgp.fc.' + key, clKey = 'tgp.clim.' + key;
+  const fcKey = 'tgp.fc2.' + key, clKey = 'tgp.clim.' + key, seKey = 'tgp.season.' + key;
   const cachedFc = force ? null : cacheGet(fcKey, 2 * 3600e3);
   const cachedCl = force ? null : cacheGet(clKey, 60 * 86400e3);
+  const cachedSe = force ? null : cacheGet(seKey, 20 * 3600e3);
 
+  const settle = () => { if (tok === LIVE.token){ renderStatus(); update(); } };
   const pFc = (async () => {
     try {
       let v = cachedFc, from = 'live';
       if (v && v.todayMs === TODAY){ from = 'cached'; } else { v = await loadForecast(loc.lat, loc.lon, TODAY); v.todayMs = TODAY; cacheSet(fcKey, v); }
       if (tok !== LIVE.token) return;
-      LIVE.fc = v; LIVE.st.fc = { s:'ok', msg: 'Forecast, last 30 days and soil temperature (' + from + ')', at: v.fetched };
+      LIVE.fc = v; LIVE.st.fc = { s:'ok', msg: 'Forecast, recent weather and soil temperature (' + from + ')', at: v.fetched };
     } catch(e){ if (tok !== LIVE.token) return; LIVE.st.fc = { s:'error', msg: e.message }; }
-    if (tok === LIVE.token){ renderStatus(); update(); }
+    settle();
   })();
   const pCl = (async () => {
     try {
@@ -85,9 +68,18 @@ async function refreshLive(force){
       LIVE.clim = v;
       LIVE.st.clim = { s:'ok', msg: 'Climate history ' + v.span + ' for this exact spot' + (v.frostFree ? ' — effectively frost-free' : '') + ' (' + from + ')', at: v.fetched };
     } catch(e){ if (tok !== LIVE.token) return; LIVE.st.clim = { s:'error', msg: e.message }; }
-    if (tok === LIVE.token){ renderStatus(); update(); }
+    settle();
   })();
-  await Promise.all([pFc, pCl]);
+  const pSe = (async () => {
+    try {
+      let v = cachedSe, from = 'live';
+      if (v && v.todayMs === TODAY) from = 'cached'; else { v = await loadSeason(loc.lat, loc.lon, TODAY); cacheSet(seKey, v); }
+      if (tok !== LIVE.token) return;
+      LIVE.season = v; LIVE.st.season = { s:'ok', msg: 'This season’s temperatures so far, for fruit and vine timing (' + from + ')' };
+    } catch(e){ if (tok !== LIVE.token) return; LIVE.st.season = { s:'error', msg: e.message }; }
+    settle();
+  })();
+  await Promise.all([pFc, pCl, pSe]);
 }
 
 async function refreshOutlook(){
@@ -109,6 +101,7 @@ function measuredSoil(){
   if (S.useLive && LIVE.fc && LIVE.fc.soilToday != null) return { v: LIVE.fc.soilToday, src: 'forecast model' };
   return null;
 }
+const zoneCtx = z => ({ cover: z && z.cover || 'open', light: z && z.light || 'sun' });
 
 function compute(){
   const loc = resolveLocation();
@@ -121,47 +114,81 @@ function compute(){
 
   const base = LIVE.clim ? baselineFromNormals(LIVE.clim.air0, LIVE.clim.lsf, LIVE.clim.faf) : baselineFromRegion(loc.base);
 
-  /* live overlay: real recent temps + 16-day forecast (only when using live data and not "normal year") */
+  /* live overlay: this season's real temperatures, the last 92 days and the 16-day forecast (only when using live data and not "normal year") */
   const live = {};
-  if (S.useLive && LIVE.fc && S.outlook !== 'neutral'){
+  if (S.useLive && S.outlook !== 'neutral'){
     live.obs = {}; live.fc = {};
-    for (const d of LIVE.fc.days){
+    const anomOf = (t, mean) => mean - base.air0[doyOfMs(TODAY + t * DAY)];
+    if (LIVE.season) for (const d of LIVE.season.days){ const tt = OFF + d.t; if (tt >= 0 && tt < OFF) live.obs[tt] = anomOf(d.t, d.mean); }
+    if (LIVE.fc) for (const d of LIVE.fc.days){
       if (d.mean == null) continue;
-      const dy = doyOfMs(TODAY + d.t * DAY);
-      const an = d.mean - base.air0[dy];
-      if (d.t < 0 && d.t >= -30) live.obs[OFF + d.t] = an;
-      else if (d.t >= 0 && d.t < 16) live.fc[d.t] = an;
+      if (d.t < 0 && d.t >= -OFF) live.obs[OFF + d.t] = anomOf(d.t, d.mean);
+      else if (d.t >= 0 && d.t < 16) live.fc[d.t] = anomOf(d.t, d.mean);
     }
   }
-  const opts = { todayMs: TODAY, base, anchors, tweak: S.tweak, protect: S.protect, live };
+  const opts = { todayMs: TODAY, base, anchors, tweak: S.tweak, live };
   let C = buildClimate(opts);
   const ms = measuredSoil();
   if (ms){ live.soilBias = clamp(ms.v - C.v.base.soil[OFF], -8, 8); C = buildClimate(opts); }
-  const Cn = buildClimate({ todayMs: TODAY, base, anchors, protect: S.protect, normal: true });
-  const Cc = S.protect === 'none' ? buildClimate({ todayMs: TODAY, base, anchors, tweak: S.tweak, protect: 'cloche', live }) : null;
+  const Cn = buildClimate({ todayMs: TODAY, base, anchors, normal: true });
 
-  /* selected crops, actual-planting overrides */
-  const sel = {}; Object.keys(S.sel).forEach(id => { if (CROP_BY_ID[id] && S.sel[id] > 0) sel[id] = S.sel[id]; });
+  /* the plan */
   const ov = {}; Object.keys(S.prog).forEach(k => { if (S.prog[k] && S.prog[k].a) ov[k] = S.prog[k].a; });
-  const sopts = { succ: S.succ, hor: S.hor, ov };
-  const plantings = schedule(C, sel, sopts);
+  const env = { C, Cn }, cache = {};
+  const scale = S.fit ? autoFitGarden(env, S, { ov, cache }) : 1;
+  const plan = planGarden(env, S, { ov, scale, cache });
+  const placed = plan.items.filter(i => i.x != null);
   const normalBy = {};
-  Object.keys(sel).forEach(id => { normalBy[id] = planCrop(Cn, CROP_BY_ID[id], { succ: S.succ, hor: S.hor }); });
-
-  const growArea = Math.max(0.1, S.len * S.wid * (1 - S.paths / 100));
-  const Ltot = growArea / S.bedW;
-  const scale = S.fit ? autoFit(plantings, sel, Ltot, S.bedW) : 1;
-  const packed = packPlan(plantings, sel, scale, Ltot, S.bedW);
-  const placed = packed.items.filter(i => i.x != null);
-  const util = utilisation(packed.items, growArea, OFF, OFF + S.hor + 60, 7);
-  const peak = util.reduce((m, u) => u.used > m.used ? u : m, { used: 0, t: OFF });
+  Object.keys(plan.byEntry).forEach(id => {
+    const b = plan.byEntry[id]; if (!b.zone) return;
+    normalBy[id] = planCrop(Cn, b.eff, { succ: S.succ, hor: S.hor, key: id, ctx: zoneCtx(b.zone) });
+  });
+  const util = utilisationZones(plan, OFF, OFF + S.hor + 60, 7);
   const rainMult = 1 - 0.3 * clamp(anchors.r.sum, -1, 1);
-  const shop = shopping(placed, rainMult, growArea);
-  const ev = events(placed, C);
+  const shop = shopping(placed, rainMult, plan);
+  const ev = events(placed);
+  const care = careTasks(placed);
+  const trees = (S.trees || []).map(t => ({ tree: t, pred: predictPerennial(C, t, Cn) }));
 
-  return { loc, grp, anchors, base, C, Cn, Cc, sel, plantings, normalBy, growArea, Ltot, scale, packed, placed, util, peak,
-           shop, ev, stats: climateStats(C), statsN: climateStats(Cn), rainMult, soil: ms };
+  /* weather for watering advice */
+  const wx = { tMean: C.v.base.air[OFF] * 0.5 + C.v.base.air[OFF + 3] * 0.5, rainPast: 0, rainYest: 0, rainSoon: 0, live: false };
+  if (S.useLive && LIVE.fc){
+    wx.live = true; let n = 0, s = 0;
+    LIVE.fc.days.forEach(d => {
+      if (d.t >= 0 && d.t <= 3 && d.mean != null){ s += d.mean; n++; }
+      if (d.t >= -7 && d.t <= -1) wx.rainPast += d.rain || 0;
+      if (d.t === -1 || d.t === 0) wx.rainYest += d.rain || 0;
+      if (d.t === 1 || d.t === 2) wx.rainSoon += d.rain || 0;
+    });
+    if (n) wx.tMean = s / n;
+  }
+
+  return { loc, grp, anchors, base, C, Cn, env, cache, plan, scale, placed, items: plan.items, normalBy, util, shop, ev, care, trees, wx,
+           stats: climateStats(C), statsN: climateStats(Cn), rainMult, soil: ms, overflow: plan.overflow };
 }
 
 let R = null;
+/* keep keyboard focus (and the caret) where it was when a section is re-drawn */
+function focusDesc(){
+  const a = document.activeElement; if (!a || a === document.body || (a.closest && a.closest('#dlg'))) return null;
+  let sel = null;
+  if (a.id) sel = '#' + CSS.escape(a.id);
+  else { const ks = Object.keys(a.dataset || {}); if (ks.length) sel = a.tagName.toLowerCase() + ks.map(k => '[data-' + k.replace(/[A-Z]/g, m => '-' + m.toLowerCase()) + '="' + CSS.escape(String(a.dataset[k])) + '"]').join(''); }
+  if (!sel) return null;
+  let ss = null, se = null; try { ss = a.selectionStart; se = a.selectionEnd; } catch(e){}
+  return { sel, ss, se };
+}
+function restoreFocus(d){
+  if (!d) return; let el = null; try { el = document.querySelector(d.sel); } catch(e){}
+  if (!el || el === document.activeElement) return;
+  el.focus({ preventScroll: true }); try { if (d.ss != null) el.setSelectionRange(d.ss, d.se); } catch(e){}
+}
 function update(){ R = compute(); renderMain(); saveState(); }
+
+/* switch to another garden */
+function useGarden(id){
+  if (!STORE.gardens[id]) return;
+  STORE.cur = id; S = curGarden();
+  if (typeof SITE !== 'undefined'){ SITE.sel = null; SITE.tool = null; SITE.calib = null; SITE.bgmove = false; SITE.drag = null; SITE.dims = null; }
+  refreshLive(false); update();
+}

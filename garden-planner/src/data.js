@@ -95,8 +95,7 @@ const GROUPS = {
   alli:  { name:'Alliums',         slot:5 },
   leaf:  { name:'Leafy greens',    slot:6 },
   legu:  { name:'Legumes',         slot:7 },
-  fruit: { name:'Fruiting',        slot:8 },
-  flow:  { name:'Flowers',         slot:9 }
+  fruit: { name:'Fruiting',        slot:8 }
 };
 
 /* Crop model
@@ -115,8 +114,8 @@ const GROUPS = {
    kind   seedling | direct | tuber | clove | slip     */
 const CROPS = [
  // ---- Fruiting
- { id:'tomato',   n:'Tomato — indeterminate', g:'fruit', warm:1, tb:10, d:75,  rt:18, span:80, minSoil:13, fb:10, nur:6, pm:3,   kg:4,    mode:'seq', max:1, def:4,  kind:'seedling', water:3, sp:'50 cm apart, staked', comp:'Basil, carrots, marigolds', avoid:'Potatoes, fennel, brassicas', tip:'Feed weekly once fruit sets; mulch to hold moisture.', pack:30 },
- { id:'cherry',   n:'Cherry tomato (vine)',     g:'fruit', warm:1, tb:10, d:65,  rt:18, span:80, minSoil:13, fb:10, nur:6, pm:3,   kg:3,    mode:'seq', max:1, def:2,  kind:'seedling', water:3, sp:'50 cm apart, staked', comp:'Basil, carrots', avoid:'Potatoes, fennel', tip:'Earliest fruit of the tomatoes — a good first planting.', pack:30 },
+ { id:'tomato',   n:'Tomato',            g:'fruit', warm:1, tb:10, d:75,  rt:18, span:70, minSoil:13, fb:10, nur:6, pm:3,   kg:4,    mode:'seq', max:1, def:4,  kind:'seedling', water:3, sp:'50 cm apart, staked', comp:'Basil, carrots, marigolds', avoid:'Potatoes, fennel, brassicas', tip:'Feed weekly once fruit sets; mulch to hold moisture.', pack:30 },
+ { id:'cherry',   n:'Cherry tomato',     g:'fruit', warm:1, tb:10, d:65,  rt:18, span:80, minSoil:13, fb:10, nur:6, pm:3,   kg:3,    mode:'seq', max:1, def:2,  kind:'seedling', water:3, sp:'50 cm apart, staked', comp:'Basil, carrots', avoid:'Potatoes, fennel', tip:'Earliest fruit of the tomatoes — a good first planting.', pack:30 },
  { id:'capsicum', n:'Capsicum',          g:'fruit', warm:1, tb:12, d:85,  rt:19, span:60, minSoil:15, fb:14, nur:8, pm:4,   kg:1.2,  mode:'seq', max:1, def:3,  kind:'seedling', water:2, sp:'40 cm apart', comp:'Basil, onions', avoid:'Fennel', tip:'Needs real warmth — wait for settled weather.', pack:20 },
  { id:'chilli',   n:'Chilli',            g:'fruit', warm:1, tb:12, d:90,  rt:19, span:70, minSoil:15, fb:14, nur:8, pm:4,   kg:0.5,  mode:'seq', max:1, def:2,  kind:'seedling', water:2, sp:'40 cm apart', comp:'Basil, tomatoes', avoid:'Fennel', tip:'Slightly stressed (a bit dry) plants are hotter.', pack:20 },
  { id:'eggplant', n:'Eggplant',          g:'fruit', warm:1, tb:12, d:95,  rt:19, span:50, minSoil:16, fb:14, nur:8, pm:3,   kg:2,    mode:'seq', max:1, def:2,  kind:'seedling', water:2, sp:'50 cm apart', comp:'Beans, basil', avoid:'Fennel', tip:'The fussiest of the warm crops — cloche it early.', pack:20 },

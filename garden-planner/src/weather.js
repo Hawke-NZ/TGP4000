@@ -52,7 +52,7 @@ async function loadForecast(lat, lon, todayMs){
     latitude: lat.toFixed(4), longitude: lon.toFixed(4),
     daily: 'temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum',
     hourly: 'soil_temperature_6cm',
-    past_days: 92, forecast_days: 16, timezone: NZ_TZ
+    past_days: 30, forecast_days: 16, timezone: NZ_TZ
   };
   let j;
   try { j = await omGet(OM.forecast, params); }
@@ -144,26 +144,6 @@ async function loadClimate(lat, lon){
     faf = fafs[Math.floor(fafs.length * 0.25)];                                // earlier-than-typical first frost
   }
   return { air0: Array.from(air0), lsf, faf, frostFree, years: nYears, span: y0 + '–' + y1, fetched: Date.now() };
-}
-
-/* --- the season so far: daily mean temperatures from a year ago up to ~3 months ago (the forecast call covers the last 92 days).
-       Used so bloom/ripening for fruit trees and vines counts the warmth that has really happened. --- */
-async function loadSeason(lat, lon, todayMs){
-  const start = isoOfMs(todayMs - 365 * DAY), end = isoOfMs(todayMs - 93 * DAY);
-  const params = { latitude: lat.toFixed(4), longitude: lon.toFixed(4), start_date: start, end_date: end, daily: 'temperature_2m_mean', timezone: NZ_TZ };
-  let j;
-  try { j = await omGet(OM.archive, params, 30000); }
-  catch (e){
-    if (!/HTTP 400/.test(e.message)) throw e;
-    params.daily = 'temperature_2m_max,temperature_2m_min';
-    j = await omGet(OM.archive, params, 30000);
-  }
-  const d = j.daily;
-  if (!d || !d.time) throw new Error('unexpected response shape');
-  const mean = d.temperature_2m_mean || (d.temperature_2m_max && d.temperature_2m_min ? d.temperature_2m_max.map((x, i) => (x != null && d.temperature_2m_min[i] != null) ? (x + d.temperature_2m_min[i]) / 2 : null) : null);
-  if (!mean) throw new Error('unexpected response shape');
-  const days = d.time.map((s, i) => ({ t: Math.round((Date.parse(s + 'T00:00:00Z') - todayMs) / DAY), mean: mean[i] })).filter(x => x.mean != null);
-  return { days, fetched: Date.now(), todayMs };
 }
 
 /* --- small localStorage cache (per-viewer convenience only) --- */
