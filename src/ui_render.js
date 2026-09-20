@@ -323,11 +323,11 @@ function peakAll(list){
 }
 
 /* ---------------- results ---------------- */
-const TABS = [['calendar', 'Calendar'], ['site', 'Site plan'], ['care', 'Care'], ['trees', 'Trees & vines'], ['shop', 'Shopping list'], ['track', 'Tracker'], ['notes', 'Notes']];
+const TABS = [['calendar', 'Calendar'], ['advisor', 'Advisor'], ['site', 'Site plan'], ['care', 'Care'], ['trees', 'Trees & vines'], ['shop', 'Shopping list'], ['track', 'Tracker'], ['notes', 'Notes']];
 function renderResults(){
   const _fd = focusDesc();
   if (!TABS.some(t => t[0] === S.tab)) S.tab = 'calendar';
-  const nav = '<div class="tabs" role="tablist">' + TABS.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + (t[0] === 'care' && careDueNow() ? ' <span class="badge">' + careDueNow() + '</span>' : '') + '</button>').join('') + '</div>';
+  const nav = '<div class="tabs" role="tablist">' + TABS.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + (t[0] === 'care' && careDueNow() ? ' <span class="badge">' + careDueNow() + '</span>' : '') + (t[0] === 'advisor' && advBadge() ? ' <span class="badge">' + advBadge() + '</span>' : '') + '</button>').join('') + '</div>';
   let body = '';
   const need = { calendar: 1, shop: 1, track: 1 }[S.tab];
   if (need && !R.items.length){
@@ -337,6 +337,7 @@ function renderResults(){
   }
   else if (S.tab === 'calendar') body = tabCalendar();
   else if (S.tab === 'site') body = tabSite();
+  else if (S.tab === 'advisor') body = tabAdvisor();
   else if (S.tab === 'care') body = tabCare();
   else if (S.tab === 'trees') body = tabTrees();
   else if (S.tab === 'shop') body = tabShop();

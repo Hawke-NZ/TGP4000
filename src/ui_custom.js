@@ -134,8 +134,8 @@ ACT.shareno = () => { PENDING_SHARE = null; clearHash(); closeDlg(); };
 const KINDS = { direct: 'Sow seed straight into the ground', seedling: 'Raise seedlings (or buy them) and plant out', tuber: 'Plant tubers or seed potatoes', clove: 'Plant cloves', bulb: 'Plant bulbs, corms or tubers', slip: 'Plant slips or runners' };
 const FAMILIES = { solanum: 'Tomato family (tomato, potato, capsicum)', cucurbit: 'Cucumber family (pumpkin, melon)', legume: 'Legumes (peas, beans)', leafy: 'Leafy greens', brassica: 'Brassicas', root: 'Root crops', allium: 'Onion family', herb: 'Herbs', flower: 'Flowers', grass: 'Grasses (corn)', beet: 'Beet family', umbel: 'Carrot family', bindweed: 'Kumara', aster: 'Daisy family (sunflowers, zinnias)' };
 const UNITS = ['kg', 'stems', 'blooms', 'heads', 'bunches', 'pieces'];
-const CROP_NUM = ['d', 'span', 'pm', 'kg', 'def', 'gap', 'max', 'nur', 'tb', 'rt', 'minSoil', 'fb', 'hmax', 'endT', 'slow', 'potL', 'water', 'lt', 'minShade', 'tray', 'sow', 'pack'];
-const CROP_TXT = ['n', 'g', 'kind', 'u', 'mode', 'feed', 'fam', 'tt', 'bunit', 'per', 'sp', 'comp', 'avoid', 'tip'];
+const CROP_NUM = ['hcm', 'd', 'span', 'pm', 'kg', 'def', 'gap', 'max', 'nur', 'tb', 'rt', 'minSoil', 'fb', 'hmax', 'endT', 'slow', 'potL', 'water', 'lt', 'minShade', 'tray', 'sow', 'pack'];
+const CROP_TXT = ['n', 'g', 'kind', 'u', 'mode', 'feed', 'fam', 'bot', 'tt', 'bunit', 'per', 'sp', 'comp', 'avoid', 'tip'];
 const BLANK_CROP = { n: '', g: 'leaf', kind: 'direct', d: 60, span: 30, warm: 0, pm: 9, kg: 0.2, u: 'kg', def: 6, mode: 'seq', max: 1, water: 2, tb: 4, rt: 14, minSoil: 6, hmax: 20, lt: 1 };
 const WARM_DEF = { tb: 10, rt: 18, minSoil: 14, fb: 10, hmax: '' }, COOL_DEF = { tb: 4, rt: 14, minSoil: 6, fb: '', hmax: 20 };
 const fld = (label, inner, hint) => '<div><label class="fld">' + label + '</label>' + inner + (hint ? '<small>' + hint + '</small>' : '') + '</div>';
@@ -145,7 +145,7 @@ const sel = (name, map) => '<select name="' + name + '">' + Object.keys(map).map
 function cropFormHtml(mode, c){
   const groupMap = {}; Object.keys(GROUPS).forEach(k => groupMap[k] = GROUPS[k].name);
   const feedMap = { '': 'Automatic (by type)' }; Object.keys(FEEDS).forEach(k => feedMap[k] = FEEDS[k].name);
-  const famMap = Object.assign({ '': 'Automatic (by type)' }, FAMILIES);
+  const famMap = { '': 'Automatic (by type)' }; Object.keys(BOT).forEach(k => famMap[k] = BOT[k].n.replace(/ \(.*$/, '') + (BOT[k].n.indexOf('(') >= 0 ? ' — ' + BOT[k].n.replace(/^.*\(/, '').replace(/\)$/, '') : ''));
   const tmpl = '<option value="">— none, start blank —</option>' + Object.keys(GROUPS).map(g => '<optgroup label="' + esc(GROUPS[g].name) + '">' + CROPS.filter(x => x.g === g).map(x => '<option value="' + esc(x.id) + '">' + esc(x.n) + '</option>').join('') + '</optgroup>').join('');
   const months = MONTHS.map((m, i) => '<label class="mchk"><input type="checkbox" name="mo" value="' + (i + 1) + '" checked>' + m + '</label>').join('');
   const title = mode === 'new' ? 'Add your own plant' : 'Settings for ' + esc(c.n);
@@ -161,7 +161,7 @@ function cropFormHtml(mode, c){
     '<div class="grid3">' + fld('Usual number to grow', inp('def', 'number', 'min="1" max="999" step="1"')) + fld('Sowing pattern', sel('mode', { seq: 'One planting, then a follow-on', stag: 'Sow a little every few weeks' })) + fld('Most rounds / sowings', inp('max', 'number', 'min="1" max="12" step="1"')) + '</div>' +
     '<div class="grid3" id="gapwrap">' + fld('Days between sowings', inp('gap', 'number', 'min="7" max="120" step="1"')) + fld('Light it wants', sel('minShade', { 0: 'Full sun', 1: 'Some shade', 2: 'Shade' }), 'Sunnier than this cuts yield.') + fld('Shadiest it copes with', sel('lt', { 0: 'Full sun only', 1: 'Part shade', 2: 'Shade' })) + '</div>' +
     '<div class="grid3">' + fld('Water needs', sel('water', { 1: 'Low', 2: 'Medium', 3: 'High' })) + fld('Pot size per plant (litres)', inp('potL', 'number', 'min="1" max="200" step="1"'), 'Leave blank if it isn’t suited to pots.') + fld('Feeding &amp; soil', sel('feed', feedMap)) + '</div>' +
-    fld('Rotation family', sel('fam', famMap), 'Used to warn you if the same family follows itself in a bed.') +
+    '<div class="grid2">' + fld('Plant family', sel('bot', famMap), 'Used for rotation and companion advice (crops in the same family share pests and diseases).') + fld('Height when grown (cm)', inp('hcm', 'number', 'min="5" max="400" step="5"'), 'Tall plants (over 120 cm) shade shorter ones to their south.') + '</div>' +
     fld('Spacing note', inp('sp', 'text', 'maxlength="120" placeholder="e.g. 30 cm apart, rows 60 cm"')) +
     '<div class="grid2">' + fld('Good companions', inp('comp', 'text', 'maxlength="120"')) + fld('Keep away from', inp('avoid', 'text', 'maxlength="120"')) + '</div>' +
     fld('Growing tip', '<textarea name="tip" rows="2" maxlength="400" placeholder="Anything worth remembering about growing this"></textarea>') +

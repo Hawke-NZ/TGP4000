@@ -262,9 +262,11 @@ function potSlots(z){
   return out;
 }
 
-/* a bed packs plantings in a 1-D strip: first-fit in time + space */
-function bedPacker(z){
-  const L = bedArea(z) / bedStrip(z), bw = bedStrip(z), placed = [], lastX = {};
+/* a bed packs plantings in a 1-D strip: first-fit in time + space.
+   With `smart` it looks at every free position and picks the one with the best companions and light
+   (tall crops to the south, no antagonists next to each other); ties go to the first fit, so nothing changes when it makes no difference. */
+function bedPacker(z, smart){
+  const L = bedArea(z) / bedStrip(z), bw = bedStrip(z), placed = [], lastX = {}, longSide = Math.max(z.w || 1, z.h || 1);
   return {
     kind: 'bed', z, cap: bedArea(z), L, bw, placed,
     tryPlace(it, c){
@@ -273,12 +275,27 @@ function bedPacker(z){
       const cands = [];
       if (lastX[it.cropId] != null) cands.push(lastX[it.cropId]);
       cands.push(0); busy.forEach(q => cands.push(q.x + q.len));
-      cands.sort((a, b) => a - b);
-      for (const x of cands){
-        if (x + it.len > L + 1e-6) continue;
-        if (busy.every(q => x + it.len <= q.x + 1e-6 || q.x + q.len <= x + 1e-6)){ it.x = x; placed.push(it); lastX[it.cropId] = x; return true; }
+      if (smart){
+        cands.push(L - it.len); busy.forEach(q => cands.push(q.x - it.len));
+        for (let k = 1; k * longSide < L - 1e-6; k++){ cands.push(k * longSide); cands.push(k * longSide - it.len); }
       }
-      return false;
+      cands.sort((a, b) => a - b);
+      const ok = [];
+      for (const x of cands){
+        if (x < -1e-6 || x + it.len > L + 1e-6) continue;
+        if (ok.length && Math.abs(ok[ok.length - 1] - x) < 1e-6) continue;
+        if (busy.every(q => x + it.len <= q.x + 1e-6 || q.x + q.len <= x + 1e-6)){
+          ok.push(x);
+          if (!smart) break;
+        }
+      }
+      if (!ok.length) return false;
+      let pick = ok[0];
+      if (smart && ok.length > 1){
+        let best = Infinity;
+        for (const x of ok){ const cst = layoutCost(z, it, x, busy) - (x === lastX[it.cropId] ? 0.4 : 0); if (cst < best - 1e-9){ best = cst; pick = x; } }
+      }
+      it.x = pick; placed.push(it); lastX[it.cropId] = pick; return true;
     },
     remove(it){ const i = placed.indexOf(it); if (i >= 0) placed.splice(i, 1); it.x = null; }
   };
@@ -311,9 +328,21 @@ function potPacker(z){
    → { items, byEntry, zones:[{z, packer, items, overflow}], overflow, scale }          */
 function planGarden(env, G, o){
   o = o || {};
+  const smart = o.smart !== false && G.smart !== false;
+  const r1 = planGardenOnce(env, G, Object.assign({}, o, { smart }));
+  if (smart && r1.overflow.length){
+    const r0 = planGardenOnce(env, G, Object.assign({}, o, { smart: false }));
+    if (r0.overflow.length < r1.overflow.length){ r0.smart = false; return r0; }
+  }
+  r1.smart = smart;
+  return r1;
+}
+function planGardenOnce(env, G, o){
+  o = o || {};
+  LAYOUT.north = (G.plan && G.plan.north) || 'up';
   const scale = o.scale != null ? o.scale : 1, cache = o.cache || {}, ov = o.ov || {};
   const zs = (G.zones || []).filter(z => z.type === 'bed' || z.type === 'pots');
-  const packers = zs.map(z => z.type === 'bed' ? bedPacker(z) : potPacker(z));
+  const packers = zs.map(z => z.type === 'bed' ? bedPacker(z, !!o.smart) : potPacker(z));
   const zres = zs.map((z, i) => ({ z, packer: packers[i], items: [], overflow: [] }));
   const byEntry = {}, all = [], overflow = [];
   const entries = (G.entries || []).filter(e => CROP_BY_ID[e.crop] && e.qty > 0);
@@ -382,15 +411,16 @@ function planGarden(env, G, o){
     if (!done){ const x = scored[0], res = place(a.e, a.c0, a.eff, x.z, x.i, x.pls); finish(a.e, a.c0, a.eff, x.z, x.i, res); }
   }
 
-  /* rotation: same family following itself in the same bed */
+  /* rotation: the same plant family following itself in the same bed */
   zres.forEach(zr => {
     if (zr.packer.kind !== 'bed') return;
     const its = zr.items.filter(i => i.x != null).slice().sort((a, b) => a.p - b.p);
     for (const b of its){
-      const cb = CROP_BY_ID[b.cropId]; if (['leafy', 'flower', 'herb', 'legume'].indexOf(cb.fam) >= 0) continue;
+      const cb = CROP_BY_ID[b.cropId], fb = BOT[cb.bot];
+      if (!fb || fb.rest < 2 || cb.bot === 'legume' || cb.perennial || isCover(cb)) continue;
       for (const a of its){
         if (a === b || a.entryId === b.entryId || a.end > b.p + 7 || b.p - a.end > 400) continue;
-        const ca = CROP_BY_ID[a.cropId]; if (ca.fam !== cb.fam) continue;
+        const ca = CROP_BY_ID[a.cropId]; if (ca.bot !== cb.bot || ca.perennial) continue;
         if (a.x < b.x + b.len && b.x < a.x + a.len){ b.rot = ca.n; break; }
       }
     }

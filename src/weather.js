@@ -50,7 +50,7 @@ async function searchPlaces(q){
 async function loadForecast(lat, lon, todayMs){
   const params = {
     latitude: lat.toFixed(4), longitude: lon.toFixed(4),
-    daily: 'temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum',
+    daily: 'temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_gusts_10m_max',
     hourly: 'soil_temperature_6cm',
     past_days: 92, forecast_days: 16, timezone: NZ_TZ
   };
@@ -58,14 +58,14 @@ async function loadForecast(lat, lon, todayMs){
   try { j = await omGet(OM.forecast, params); }
   catch (e){
     if (!/HTTP 400/.test(e.message)) throw e;
-    params.daily = 'temperature_2m_max,temperature_2m_min,precipitation_sum';       // older API without daily mean
+    params.daily = 'temperature_2m_max,temperature_2m_min,precipitation_sum';       // older API without daily mean or gusts
     j = await omGet(OM.forecast, params);
   }
   const d = j.daily;
   if (!d || !d.time || !d.temperature_2m_max || !d.temperature_2m_min) throw new Error('unexpected response shape');
   const days = d.time.map((s, i) => ({
     t: Math.round((Date.parse(s + 'T00:00:00Z') - todayMs) / DAY),   // 0 = today, negative = past
-    date: s, max: d.temperature_2m_max[i], min: d.temperature_2m_min[i], rain: d.precipitation_sum ? d.precipitation_sum[i] : 0,
+    date: s, max: d.temperature_2m_max[i], min: d.temperature_2m_min[i], rain: d.precipitation_sum ? d.precipitation_sum[i] : 0, gust: d.wind_gusts_10m_max && d.wind_gusts_10m_max[i] != null ? d.wind_gusts_10m_max[i] : null,
     mean: d.temperature_2m_mean && d.temperature_2m_mean[i] != null ? d.temperature_2m_mean[i] : (d.temperature_2m_max[i] != null && d.temperature_2m_min[i] != null ? (d.temperature_2m_max[i] + d.temperature_2m_min[i]) / 2 : null)
   }));
   /* soil: mean of today's hourly values */

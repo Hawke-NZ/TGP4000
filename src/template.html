@@ -342,6 +342,7 @@ svg .frl{stroke:var(--ink-3);stroke-dasharray:3 3;stroke-width:1.5} svg .tdl{str
 .fruit{fill:none;stroke:var(--kowhai);stroke-width:3}
 .preview{fill:var(--accent);fill-opacity:.15;stroke:var(--accent);stroke-dasharray:5 4;stroke-width:2;vector-effect:non-scaling-stroke}
 .cpt{fill:var(--kowhai);stroke:var(--ink);stroke-width:2} .cln{stroke:var(--kowhai);stroke-width:2.5;stroke-dasharray:5 3} #plansvg .cpl{font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px}
+#plansvg .compass{pointer-events:none} #plansvg .compass circle{fill:var(--surface);fill-opacity:.85;stroke:var(--ink-3);stroke-width:1} #plansvg .compass path{fill:var(--ink-2)} #plansvg .compass text{fill:var(--ink-2);font-size:11px;font-weight:700}
 .scalebar line{stroke:var(--ink-2);stroke-width:1.5;vector-effect:non-scaling-stroke} #plansvg .scalebar text{fill:var(--ink-2);font-size:calc(var(--fs,12px) * .85)}
 .dater{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
 .dater label{font-size:.83rem;font-weight:600;color:var(--ink-2)} .dater input[type=range]{flex:1;min-width:160px} .dater output{min-width:8.6rem;font-weight:600}
@@ -369,8 +370,61 @@ dialog#dlg::backdrop{background:rgba(10,20,14,.6)}
 .cropform small{display:block;color:var(--ink-3);font-size:.76rem;margin-top:.2rem}
 #dlgmsg:empty{display:none}
 
+/* ---------- advisor ---------- */
+.advnav{margin:.9rem 0 .4rem} .advnav .gchip{white-space:nowrap}
+.advbody h3{margin:1.5rem 0 .5rem} .advbody h4{margin:0} .advbody h5{margin:.9rem 0 .2rem;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);font-family:var(--font-body);font-weight:700}
+.advbody h3 em,.advbody h3 small{font-family:var(--font-body);font-weight:500;font-size:.8rem;color:var(--ink-3);font-style:normal}
+.advbody .cguide h4{margin:1.2rem 0 .3rem;font-size:1rem}
+.advbody select,.advbody input[type=search],.advbody input[type=text],.advbody input[type=number],.advbody input[type=date]{max-width:100%}
+.alerts{display:grid;gap:8px}
+.alert{border:1px solid var(--line);border-left:5px solid var(--ink-3);border-radius:10px;padding:10px 14px;background:var(--surface)}
+.alert h4{font-size:.95rem} .alert p{margin:.2rem 0 0;color:var(--ink-2);font-size:.9rem}
+.alert.a1{border-left-color:var(--kowhai)} .alert.a2{border-left-color:var(--warn-c);background:var(--warn-bg)} .alert.a3{border-left-color:var(--crit);background:var(--crit-bg)}
+.alert.a0{border-left-color:var(--accent)}
+.callout{background:var(--accent-soft);border-radius:10px;padding:10px 14px;margin:.8rem 0}
+.finds{display:grid;gap:10px}
+.find{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface)}
+.find.s3{border-left-color:var(--crit)} .find.s2{border-left-color:var(--warn-c)} .find.s1{border-left-color:var(--kowhai)} .find.s0{border-left-color:var(--accent)}
+.find-h{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap} .find-h h4{flex:1;min-width:12rem;font-size:.98rem;line-height:1.3} .find-h .x{margin-left:auto;min-height:30px;min-width:30px}
+.find .cat{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--ink-3);padding-top:.2rem}
+.find p{margin:.35rem 0;color:var(--ink-2)} .find .row{margin-top:.5rem;align-items:center}
+.ev{display:inline-block;font-size:.7rem;font-weight:600;border-radius:999px;padding:.08rem .5rem;border:1px solid transparent;white-space:nowrap;vertical-align:1px;cursor:help}
+.ev-sci{background:var(--accent-soft);color:var(--accent)} .ev-prac{background:color-mix(in srgb,var(--g1) 14%,var(--surface));color:var(--ink-2);border-color:color-mix(in srgb,var(--g1) 35%,transparent)}
+.ev-mixed{background:var(--warn-bg);color:var(--warn-c)} .ev-trad{background:transparent;color:var(--ink-3);border:1px dashed var(--ink-3)}
+.evlegend{list-style:none;margin:.4rem 0;padding:0;display:grid;gap:4px;font-size:.86rem;color:var(--ink-2)} .evlegend li{display:flex;gap:8px;align-items:baseline}
+.score{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:1rem 0}
+.score .big{display:flex;flex-direction:column;align-items:center;min-width:6.5rem;text-align:center} .score .n{font:700 3rem/1 var(--font-display);color:var(--accent)} .score .of{font-size:.8rem;color:var(--ink-3);margin-top:-2px}
+.score .bars{flex:1;min-width:14rem;display:grid;gap:6px} .score>.hint{flex-basis:100%;margin:0}
+.bar-row{display:grid;grid-template-columns:9.5rem 1fr 2rem;gap:8px;align-items:center;font-size:.84rem;color:var(--ink-2)} .bar-row .bv{text-align:right;font-weight:600}
+.bar-row .bt{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden} .bar-row .bt i{display:block;height:100%;border-radius:999px;background:var(--accent)} .bar-row .bt i.a{background:var(--kowhai)} .bar-row .bt i.r{background:var(--crit)}
+.goods{list-style:none;padding:0;margin:.4rem 0;display:grid;gap:6px;font-size:.9rem;color:var(--ink-2)} .goods .ck{color:var(--good);font-weight:700}
+.sugs .sug h4{font-size:1rem} .sug .why{margin:.3rem 0;padding-left:1.1rem;color:var(--ink-2);font-size:.88rem} .sug .row{margin-top:.6rem}
+.chk.smart{background:var(--surface-2);padding:10px 12px;border-radius:10px}
+.pests{display:grid;gap:8px}
+details.pest{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:0}
+details.pest>summary{cursor:pointer;padding:10px 14px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;list-style:none} details.pest>summary::-webkit-details-marker{display:none}
+details.pest>summary::before{content:'▸';color:var(--ink-3);width:.8rem} details.pest[open]>summary::before{content:'▾'}
+details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;padding-left:1.1rem}
+.pbody{padding:0 14px 12px 14px;color:var(--ink-2);font-size:.92rem} .pbody p{margin:.4rem 0} .pbody .whynow{color:var(--warn-c)}
+.pbody ol.notes{padding-left:1.3rem}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:.8rem 0} .toolbar input[type=search]{flex:1;min-width:12rem} .toolbar .chk{margin-top:0}
+.pairs{list-style:none;margin:.3rem 0;padding:0;display:grid;gap:8px;font-size:.9rem} .pairs li{padding-left:.7rem;border-left:3px solid var(--line)}
+.pairs.good li,.cl.good .pairs li{border-left-color:var(--good)} .pairs.bad li,.cl.bad .pairs li{border-left-color:var(--crit)} .pairs.care li,.cl.care .pairs li{border-left-color:var(--kowhai)}
+.cols3{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:16px;margin:.8rem 0} .cl h4{margin-bottom:.3rem}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:8px 16px;margin:.8rem 0} .fact dt{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--ink-3)} .fact dd{margin:0;font-size:.9rem}
+.cguide{margin-top:.8rem} .cguide .card-h{flex-wrap:wrap}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:4px 14px;margin-top:.5rem} .rh{display:block;font-size:.84rem;color:var(--ink-2)} .rh span{display:block;font-weight:600;margin:.4rem 0 .15rem}
+.rot h5{margin-top:.9rem}
+.icspanel{margin-top:.8rem}
+.profile{max-width:34rem} .profile select{width:100%} .goalchips{margin:.2rem 0 .6rem}
+.jobs li{flex-wrap:nowrap;align-items:flex-start;gap:10px} .jobs li .tx{display:block;flex:1} .jobs input[type=checkbox]{margin-top:.25rem;flex:none} .jobs li.done .tx{text-decoration:line-through;color:var(--ink-3)}
+.whynow{margin:.3rem 0}
+.advbody .agenda li b{font-weight:700}
+.advbody .agenda .wintx{display:block;line-height:1.6}
+@media (max-width:640px){ .advnav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px} .advnav .gchip{flex:none} .bar-row{grid-template-columns:7.5rem 1fr 1.8rem} }
+
 @media print{
-  body{background:#fff;color:#000} .top .themebtn,.datechip,.sidewrap,.picker,.acts,.tabs,.actions,.brief,.yc .x,.stp,.btn,.gbar,.tools,.dater,.insp,dialog{display:none!important}
+  body{background:#fff;color:#000} .top .themebtn,.datechip,.sidewrap,.picker,.acts,.tabs,.advnav,.toolbar,.icspanel,.actions,.brief,.yc .x,.stp,.btn,.gbar,.tools,.dater,.insp,dialog{display:none!important}
   .app{display:block} .main{gap:14px}
 }
 @media (prefers-reduced-motion:no-preference){ .bar,.chip,.btn{transition:filter .15s,border-color .15s} }
@@ -403,7 +457,9 @@ dialog#dlg::backdrop{background:rgba(10,20,14,.6)}
 <script>
 /*DATA*/
 /*DATA2*/
+/*DATAADV*/
 /*ENGINE*/
+/*ADVICE*/
 /*WEATHER*/
 /*STORE*/
 /*UICORE*/
@@ -412,6 +468,7 @@ dialog#dlg::backdrop{background:rgba(10,20,14,.6)}
 /*UITREES*/
 /*UISITE*/
 /*UICUSTOM*/
+/*UIADVICE*/
 </script>
 <script>
 /* header: date chip, theme toggle, mobile settings panel */

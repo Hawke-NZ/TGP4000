@@ -19,10 +19,22 @@ Gardens are saved in each browser (localStorage), so they don't sync between dev
 - **Multiple gardens.** Front bed, back yard, glasshouse, Christchurch: each is its own garden with its own place, plots, crops and notes. Switch from the bar at the top.
 - **Sharing.** From the garden menu you can copy a share link (the whole garden packed into the URL, no server involved), export a `.json` file, or import one. Importing never overwrites anything of yours. Care logs and progress stay with you and aren't shared.
 - **Site plan.** Draw beds, borders and pots on a scaled plan, drag and resize them, or load a photo of your yard, set the scale with one known distance and trace over it. Each area can be tagged as open sun, part shade or shade, and as open ground, under a cloche or under glass. The planner uses those tags to shift dates and pick suitable crops. Pots have a count and a size in litres, and the planner works out what fits in each.
-- **Crops.** 66 built in (vegetables, herbs, flowers), including daikon, wasabi, popcorn, watermelon, determinate and indeterminate tomatoes, and a green manure. Every crop shows when to start seed indoors versus sow direct versus plant seedlings.
+- **Crops.** 71 built in (vegetables, herbs, flowers), including daikon, wasabi, popcorn, watermelon, determinate and indeterminate tomatoes, a green manure, and helper plants (dill, alyssum, borage, chives, phacelia) that attract pollinators and predators. Every crop shows when to start seed indoors versus sow direct versus plant seedlings.
 - **Your own crops.** In **Crops**, choose *Add a crop* and fill in days to maturity, temperature needs, spacing and so on. The preview shows your dates straight away. You can also tweak a built-in crop (your change is stored as an override, and you can reset it).
 - **Care.** Feeding and watering schedules per plant, with weather-adjusted watering advice and a log. Soil amendment suggestions before and after each crop.
 - **Trees and vines.** 33 perennials: apples, pears, stone fruit, figs, citrus, feijoas, grape varieties, plus roses, lavender, hydrangea and agapanthus. Expected flowering and harvest dates come from this season's temperatures so far and the seasonal outlook, with a stage timeline for each. You can enter your own observed dates to calibrate.
+- **Advisor.** A tab that reads your gardens and tells you what to do, in nine sections:
+  - *This week*: heat, frost, wind and rain alerts from the live forecast, matched to what you actually have in the ground, plus this month's jobs and pests to watch for (tick jobs off and they stay ticked).
+  - *Improve my garden*: a health score and a list of findings, most important first, with one-click fixes where there is one (move a plant, turn on smart layout, shrink quantities to fit). It checks light and space, companions, tall crops shading short ones, rotation, harvest gaps (months with nothing to pick) and crop suggestions that fit your climate, space and what you already grow. You can dismiss a tip and restore it later.
+  - *Companions*: what grows well next to what, and what to keep apart. Every pairing carries an evidence label (see below). Also shown as a short "grows well with" list on each crop guide.
+  - *Pests and diseases*: 42 entries with what to look for, what to do, and prevention. Searchable, and filterable by pest or disease. "Log it" adds it to the season review.
+  - *Techniques*: 29 methods (raised beds, mulching, succession sowing, no-dig, hügelkultur, cloches, windbreaks, drip irrigation, green manures, three sisters and more). The list adapts to your garden profile and shows the ones that would help your site most.
+  - *Crop guide*: sowing, spacing, feeding, common problems and companions for each crop.
+  - *Rotation*: enter which plant family was in each bed in previous seasons and the planner warns you off repeating a family too soon (brassicas, tomato family, onions and so on) and can suggest what to grow next.
+  - *Season review*: log harvests and problems as you go; at season end it shows what worked.
+  - *My garden*: soil type, wind exposure, gardening experience, what matters most to you (goals), organic-first or not, and which way north points. Suggestions and techniques change with it.
+- **Smart layout.** Optional per garden. When on, the planner packs beds with companions together, keeps antagonists apart, puts tall crops on the south side (in NZ the sun is in the north) and gives shade-tolerant crops the shadier spots. If the smart layout would leave more plants without room than plain packing, it falls back automatically. Set which way north points on the site plan (a small compass shows it).
+- **Calendar export.** Export planting, harvest and jobs to an `.ics` file for Google, Apple or Outlook calendars.
 - **Notes.** A notes box on every planting and tree, to refer back to next year.
 - **Flowers.** Treated like any other crop: succession sowing, cut-flower seasons, pots, notes.
 
@@ -42,6 +54,17 @@ Fruit and vine dates start counting warmth from 1 August, are calibrated against
 
 The **Data sources** panel shows which of these loaded live and which fell back to built-in data.
 
+## How to read the companion advice
+
+Companion planting is a mix of solid science, useful folklore and plain myth, and most garden apps don't tell you which is which. Every pairing here has one of four labels:
+
+- **Research-backed**: shown in trials or well understood (for example, alyssum and other flowers attract hoverflies that eat aphids; onions and carrots share little; tomatoes and potatoes share blight and psyllid).
+- **Practical**: sound horticultural logic (tall crops shade short ones, a hungry crop next to a light feeder, plants that share pests) but not formally trialled.
+- **Mixed**: some trials found an effect, others didn't.
+- **Traditional**: long-standing advice with little or no evidence (for example, onions stunting peas and beans). The planner still mentions it, ranks it lower and rarely lets it lower your score, since keeping the plants apart costs nothing.
+
+The health score and findings weight these accordingly. Advice is written for NZ conditions, and where evidence is weak the text says so.
+
 ## Keeping the seasonal outlook current
 
 NIWA / Earth Sciences NZ publishes a new outlook about monthly. To update it, edit **`outlook.json`** in the repo (the pencil icon on GitHub) and change:
@@ -53,11 +76,13 @@ The page shows a warning once the outlook is over 100 days old. The summer and a
 
 ## Editing the built-in data
 
-Crop rules are in `src/data.js` and `src/data_v2.js`: base temperature, days to harvest, spacing, frost buffer and so on. Perennials (trees, vines, shrubs) are in `src/data_v2.js`. After editing, run `cd src && python3 build.py` (needs Python 3 and Node). It writes `src/dist/index.html` and `src/dist/outlook.json`; copy those over the ones in the repo root.
+Crop rules are in `src/data.js` and `src/data_v2.js`: base temperature, days to harvest, spacing, frost buffer and so on. Perennials (trees, vines, shrubs) are in `src/data_v2.js`. The advice content (companion pairs, pests, techniques, monthly jobs, crop guide) is in `src/data_advice.js`, and the rules that turn it into findings are in `src/advice.js`. To add a companion pair, add a line to `PAIRS`: the two plants (crop ids or plant families like `@brassica`), `+` for good or `-` for bad, an evidence label (`sci`, `prac`, `mixed`, `trad`), a severity from 1 to 3, and a reason. After editing, run `cd src && python3 build.py` (needs Python 3 and Node). It writes `src/dist/index.html` and `src/dist/outlook.json`; copy those over the ones in the repo root.
 
 ## Limits worth knowing
 
 - The model is a guide, not a guarantee. Regional numbers, crop timings and the fruit and vine reference dates are typical values, worth tuning against your own experience (that's what the notes and the calibration inputs are for). Always check the 7-day forecast before planting out tender seedlings.
+- The advice is a guide, written for typical NZ home gardens. It was fact-checked by independent review and corrected, but local conditions vary: your soil, microclimate and local council or industry advice (for example on notifiable pests and spray rules) come first. Pest and disease timing and tree reference dates are approximate.
+- The Advisor's climate band (warm, temperate, cool) is worked out from your latitude and frost dates. Fruit trees aren't counted in the harvest-gap check, only vegetables and flowers.
 - The live weather calls were tested against mocked responses in a sandbox that couldn't reach Open-Meteo. If a source fails on your device, the Data sources panel says which, and the planner carries on with built-in data.
 - Frost dates from reanalysis data smooth out local frost hollows. If you're in a cold pocket, tag the area as shade or add a cool nudge.
 - Photos you trace over are stored in the browser. They're included in exported `.json` files but not in share links, to keep the links short.

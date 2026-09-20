@@ -11,19 +11,34 @@ const isoToday = () => new Date(Date.now() + 0).toISOString().slice(0, 10);
 const STARTER = [['tomato', 4], ['capsicum', 3], ['zucchini', 2], ['cucumber', 3], ['corn', 12], ['dbean', 24], ['lettuce', 6], ['basil', 4], ['carrot', 60]];
 
 function defaultZone(name, extra){
-  return Object.assign({ id: uid('z'), type: 'bed', name: name || 'Main bed', x: 1, y: 1, w: 6, h: 4, bw: 1.2, light: 'sun', cover: 'open', pots: [], note: '' }, extra || {});
+  return Object.assign({ id: uid('z'), type: 'bed', name: name || 'Main bed', x: 1, y: 1, w: 6, h: 4, bw: 1.2, light: 'sun', cover: 'open', pots: [], note: '', hist: {} }, extra || {});
 }
 function newGarden(name, inherit){
   const g = Object.assign({
     id: uid('g'), name: name || 'My garden', region: 'pukekohe', place: null, outlook: 'auto', tweak: 0, rain: 'auto', useLive: true, soilNow: '',
     hor: 365, succ: true, fit: false,
     zones: [], entries: [], trees: [], notes: {}, care: { log: [], amend: {} }, prog: {},
-    plan: { w: 12, bg: null, bgOp: 0.6 }, tab: 'calendar', viewT: null, focus: null, created: Date.now()
+    plan: { w: 12, bg: null, bgOp: 0.6, north: 'up' }, tab: 'calendar', viewT: null, focus: null, created: Date.now(),
+    smart: true, profile: { soil: 'unknown', wind: '', exp: 'some', goals: [], organic: true, done: false }, adv: { sec: 'week', dismissed: {}, jobs: {} }
   }, inherit || {});
   g.zones = g.zones.length ? g.zones : [defaultZone('Main bed')];
   return g;
 }
 function starterEntries(){ return STARTER.map(([c, n]) => ({ id: uid('e'), crop: c, qty: n, zone: 'auto', how: 'auto', name: '' })); }
+
+/* make sure an older or partial garden has every field the newer features expect */
+function fillGarden(g){
+  g.plan = Object.assign({ w: 12, bg: null, bgOp: 0.6, north: 'up' }, g.plan || {});
+  if (['up', 'right', 'down', 'left'].indexOf(g.plan.north) < 0) g.plan.north = 'up';
+  g.profile = Object.assign({ soil: 'unknown', wind: '', exp: 'some', goals: [], organic: true, done: false }, g.profile || {});
+  if (!Array.isArray(g.profile.goals)) g.profile.goals = [];
+  g.adv = Object.assign({ sec: 'week', dismissed: {}, jobs: {} }, g.adv || {});
+  g.adv.dismissed = g.adv.dismissed || {}; g.adv.jobs = g.adv.jobs || {};
+  if (g.smart == null) g.smart = true;
+  (g.zones || []).forEach(z => { if (!z.hist || typeof z.hist !== 'object') z.hist = {}; });
+  g.care = g.care || { log: [], amend: {} }; g.care.log = g.care.log || []; g.care.amend = g.care.amend || {};
+  return g;
+}
 
 /* ---------- v1 → v2 ---------- */
 function migrateV1(o){
@@ -44,7 +59,7 @@ function loadStore(){
     const raw = localStorage.getItem(STORE_KEY);
     if (raw){
       const o = JSON.parse(raw);
-      if (o && o.v === 2 && o.gardens && o.order && o.order.length){ o.custom = o.custom || []; o.overrides = o.overrides || {}; return o; }
+      if (o && o.v === 2 && o.gardens && o.order && o.order.length){ o.custom = o.custom || []; o.overrides = o.overrides || {}; Object.keys(o.gardens).forEach(k => fillGarden(o.gardens[k])); return o; }
     }
   } catch(e){}
   let g = null;
@@ -79,6 +94,8 @@ const CROP_FIELDS = ['n', 'g', 'warm', 'tb', 'd', 'rt', 'span', 'minSoil', 'fb',
 function normalizeCrop(c){
   const gt = GROUP_TRAITS[c.g] || GROUP_TRAITS.leaf;
   const o = Object.assign({ warm: 0, tb: 5, rt: 15, d: 60, span: 30, minSoil: 8, nur: 0, pm: 10, kg: 0.2, mode: 'seq', max: 1, def: 6, kind: 'direct', water: 2, sp: '', comp: '—', avoid: '—', tip: '', pack: 50, u: 'kg' }, gt, c);
+  if (c.bot == null && c.fam && FAM_TO_BOT[c.fam]) o.bot = FAM_TO_BOT[c.fam];
+  applyAdvice(o);
   if (o.mode === 'stag' && !o.gap) o.gap = 21;
   if (o.mode === 'stag' && o.max < 2) o.max = 4;
   if (o.kind !== 'seedling') o.nur = 0;
@@ -91,6 +108,7 @@ function rebuildCrops(){
   STORE.custom.forEach(cc => { const c = normalizeCrop(cc); c.custom = true; CROPS.push(c); });
   Object.keys(CROP_BY_ID).forEach(k => delete CROP_BY_ID[k]);
   CROPS.forEach(c => CROP_BY_ID[c.id] = c);
+  ADV_VER++;
 }
 
 /* ---------- gardens ---------- */
@@ -176,8 +194,7 @@ function importPayload(p){
   const base = newGarden(g.name || 'Imported garden');
   const out = Object.assign({}, base, g);
   out.id = uid('g'); out.name = uniqueName(out.name || 'Imported garden'); out.focus = null; out.viewT = null;
-  out.plan = Object.assign({ w: 12, bg: null, bgOp: 0.6 }, out.plan || {});
-  out.care = out.care || { log: [], amend: {} }; out.care.log = out.care.log || []; out.care.amend = out.care.amend || {};
+  fillGarden(out);
   out.zones = (out.zones || []).map(z => Object.assign(defaultZone(z.name), z));
   out.trees = out.trees || []; out.notes = out.notes || {}; out.prog = out.prog || {};
   out.entries = (out.entries || []).filter(e => CROP_BY_ID[e.crop]);

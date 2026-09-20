@@ -87,8 +87,8 @@ function tabCare(){
 
   /* history */
   const hist = careLog().slice().sort((a, b) => b.d.localeCompare(a.d)).slice(0, 14);
-  const kindWord = { water: 'Watered', feed: 'Fed', amend: 'Amended soil' };
-  const hHtml = hist.length ? '<ul class="hist">' + hist.map(l => '<li><span class="dt">' + fmtT(tOfIso(l.d)) + '</span><span><b>' + kindWord[l.k] + '</b> ' + esc(l.zone ? zoneName(l.zone) : l.ent ? (() => { const e = S.entries.find(x => x.id === l.ent); return e ? entryName(e) : 'plant'; })() : '') + (l.what ? ' — ' + esc(l.what) : '') + '</span><button type="button" class="btn ic x" data-act="logDel" data-id="' + l.id + '" aria-label="Delete this entry">×</button></li>').join('') + '</ul>' : '<p class="muted">Nothing logged yet. Use the buttons above, or add an entry below.</p>';
+  const kindWord = { water: 'Watered', feed: 'Fed', amend: 'Amended soil', harvest: 'Harvested', issue: 'Problem' };
+  const hHtml = hist.length ? '<ul class="hist">' + hist.map(l => '<li><span class="dt">' + fmtT(tOfIso(l.d)) + '</span><span><b>' + kindWord[l.k] + '</b> ' + (l.k === 'harvest' || l.k === 'issue' ? esc(logLine(l)) : esc(l.zone ? zoneName(l.zone) : l.ent ? (() => { const e = S.entries.find(x => x.id === l.ent); return e ? entryName(e) : 'plant'; })() : '')) + (l.what && l.k !== 'issue' ? ' — ' + esc(l.what) : '') + '</span><button type="button" class="btn ic x" data-act="logDel" data-id="' + l.id + '" aria-label="Delete this entry">×</button></li>').join('') + '</ul>' : '<p class="muted">Nothing logged yet. Use the buttons above, or add an entry below.</p>';
 
   return '<div><h3>Watering</h3>' + wHtml + '</div>' +
     '<div><h3>Feeding</h3>' + fHtml + '</div>' +

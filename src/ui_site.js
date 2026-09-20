@@ -83,6 +83,7 @@ function tabSite(){
         (bg ? '<button type="button" class="btn ' + (SITE.calib ? 'on' : '') + '" data-act="calibstart">Set scale</button><button type="button" class="btn ' + (SITE.bgmove ? 'on' : '') + '" data-act="bgmove" aria-pressed="' + SITE.bgmove + '">Move photo</button><button type="button" class="btn x" data-act="bgremove">Remove</button>' : '') + '</div>' +
       (bg ? '<div class="tgrp"><label class="fld tl" for="bgop">Photo strength</label><input id="bgop" type="range" min="0.1" max="1" step="0.05" value="' + (S.plan.bgOp || 0.6) + '" data-bind="bgop" aria-label="Photo opacity"></div>' : '') +
       '<div class="tgrp"><label class="fld tl" for="planw">Plan width (m)</label><input id="planw" type="number" min="3" max="200" step="1" value="' + (S.plan.w || 12) + '" data-bind="planw"></div>' +
+      '<div class="tgrp"><label class="fld tl" for="northsel">North is</label><select id="northsel" data-bind="north">' + [['up', 'at the top'], ['right', 'on the right'], ['down', 'at the bottom'], ['left', 'on the left']].map(o => '<option value="' + o[0] + '"' + ((S.plan.north || 'up') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
     '</div>' +
     '<p class="hint" id="sitehint" role="status">' + esc(siteHint()) + '</p>' +
     '<div class="sitegrid"><div class="planside">' +
@@ -128,6 +129,9 @@ function redrawPlan(){
   for (let m = step; m < d.W; m += step) g += '<line class="gl" x1="' + m * k + '" x2="' + m * k + '" y1="0" y2="' + d.H * k + '"/>';
   for (let m = step; m < d.H; m += step) g += '<line class="gl" y1="' + m * k + '" y2="' + m * k + '" x1="0" x2="' + d.W * k + '"/>';
   g += '<g class="scalebar" transform="translate(8 ' + (d.H * k - 10) + ')"><line x1="0" x2="' + step * k + '" y1="0" y2="0"/><line x1="0" x2="0" y1="-4" y2="4"/><line x1="' + step * k + '" x2="' + step * k + '" y1="-4" y2="4"/><text x="' + (step * k + 6) + '" y="4">' + step + ' m</text></g>';
+  /* compass: the sun is in the north, so this shows which side is sunny and where tall crops should go (south) */
+  const nv = { up: [0, -1, 0], right: [1, 0, 90], down: [0, 1, 180], left: [-1, 0, 270] }[(S.plan && S.plan.north) || 'up'] || [0, -1, 0];
+  g += '<g class="compass" transform="translate(' + (VW - 36) + ' 30)" aria-hidden="true"><title>North</title><circle r="14"/><g transform="rotate(' + nv[2] + ')"><path d="M0 -11 L5 6 L0 3 L-5 6 Z"/></g><text x="' + nv[0] * 21 + '" y="' + nv[1] * 21 + '" text-anchor="middle" dominant-baseline="central">N</text></g>';
   /* spaces (the selected one last, so its handles are reachable) */
   const zs = S.zones.slice().sort((a, b) => (a.id === SITE.sel) - (b.id === SITE.sel));
   let body = zs.map(z => zoneSvg(z, t, d)).join('');
