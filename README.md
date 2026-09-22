@@ -7,16 +7,17 @@ It's a static site: no server, no build step, no API keys. Everything runs in th
 ## Put it on GitHub Pages
 
 1. Create a new repository (for example `garden-planner`), or reuse the one you already have.
-2. Upload `index.html`, `outlook.json`, `manifest.webmanifest`, `icon.svg` and `.nojekyll`. Uploading `src/` as well is harmless and keeps the editable source with it.
+2. Upload `index.html`, `config.js`, `outlook.json`, `manifest.webmanifest`, `icon.svg` and `.nojekyll`. Uploading `src/` as well is harmless and keeps the editable source with it.
 3. In the repo go to **Settings → Pages**, choose **Deploy from a branch**, branch `main`, folder `/ (root)`, and save.
 4. After a minute it's live at `https://<your-username>.github.io/<repo-name>/`.
 5. On a phone, open that link and use **Share → Add to Home Screen** for an app-style icon.
 
-Gardens are saved in each browser (localStorage), so they don't sync between devices by themselves. Use the share features below to move or share them. If you're replacing an older version of this planner, your existing garden migrates automatically the first time you open the new page.
+Gardens are saved in each browser (localStorage). To keep your own devices in step, turn on **sync** (below, one-off setup). Otherwise use the share features to move gardens around. If you're replacing an older version of this planner, your existing garden migrates automatically the first time you open the new page.
 
 ## What's in it
 
 - **Multiple gardens.** Front bed, back yard, glasshouse, Christchurch: each is its own garden with its own place, plots, crops and notes. Switch from the bar at the top.
+- **Sync across your devices (optional).** Sign in with Google and your gardens follow you between your phone and laptops. Each person signs in with their own Google account and their gardens are stored in a hidden folder in *their own* Google Drive that only this planner can open. Nothing goes to any server you run, nobody else (including you, as the host) can see anyone's gardens, and friends using the same site stay completely separate. See **Turn on sync** below.
 - **Sharing.** From the garden menu you can copy a share link (the whole garden packed into the URL, no server involved), export a `.json` file, or import one. Importing never overwrites anything of yours. Care logs and progress stay with you and aren't shared.
 - **Site plan.** Draw beds, borders and pots on a scaled plan, drag and resize them, or load a photo of your yard, set the scale with one known distance and trace over it. Each area can be tagged as open sun, part shade or shade, and as open ground, under a cloche or under glass. The planner uses those tags to shift dates and pick suitable crops. Pots have a count and a size in litres, and the planner works out what fits in each.
 - **Crops.** 71 built in (vegetables, herbs, flowers), including daikon, wasabi, popcorn, watermelon, determinate and indeterminate tomatoes, a green manure, and helper plants (dill, alyssum, borage, chives, phacelia) that attract pollinators and predators. Every crop shows when to start seed indoors versus sow direct versus plant seedlings.
@@ -37,6 +38,30 @@ Gardens are saved in each browser (localStorage), so they don't sync between dev
 - **Calendar export.** Export planting, harvest and jobs to an `.ics` file for Google, Apple or Outlook calendars.
 - **Notes.** A notes box on every planting and tree, to refer back to next year.
 - **Flowers.** Treated like any other crop: succession sowing, cut-flower seasons, pots, notes.
+
+## Turn on sync (one-off, about ten minutes)
+
+Sync needs a free Google "client ID" for your copy of the site. It's a public label, not a secret, and you only do this once. Everyone who uses your site then signs in with their own Google account; they don't need to do any setup.
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com/) and create a project (call it "Garden Planner").
+2. **APIs & Services → Library**, search for **Google Drive API** and click **Enable**.
+3. Open **Google Auth Platform** (or **APIs & Services → OAuth consent screen**) and set it up: app name "Total Garden Planner 4000", your email as the support and contact address, audience **External**.
+4. Under **Data Access** (Scopes), add these two scopes: `.../auth/drive.appdata` (the app's own hidden folder) and `.../auth/userinfo.email` (to show which account is signed in). Both are in Google's lowest-risk "non-sensitive" group, so no security review is needed.
+5. Under **Audience**, click **Publish app** so the status is **In production**. Do not skip this: in "Testing" mode only people you list can sign in, and their sign-in expires after 7 days. If Google shows a "verification" notice, it's the basic branding check (app name and home page), not a security review.
+6. Under **Clients** (or **Credentials → Create credentials → OAuth client ID**) create a client of type **Web application**. Under **Authorized JavaScript origins** add your site's origin: `https://<your-username>.github.io` (just the origin, no repo name, no trailing slash). Add `http://localhost:8000` too if you'll test locally. Leave redirect URIs empty. Click Create and copy the **Client ID** (it ends in `.apps.googleusercontent.com`).
+7. Open **`config.js`** in your repo (pencil icon), paste the ID between the quotes, and commit. Keeping it in its own file means it survives replacing `index.html` with a newer version.
+8. Open your site, click **Sync** at the top and sign in with Google. On your other device, sign in with the same account and the gardens appear.
+
+If sign-in fails: *origin_mismatch* means the address in step 6 doesn't exactly match the site's address; *access blocked / app not verified* means step 5 wasn't done; a 403 from Drive means step 2 wasn't done.
+
+### How sync behaves
+
+- Changes save on the device first (so the planner works offline), then sync a few seconds later. It also checks the cloud every couple of minutes and when you come back to the tab.
+- It merges rather than overwrites. Plants, spaces, trees, notes and care-log entries are merged one by one, so two devices adding different things both keep them. Only when both devices change the very same value does the most recent edit win. Deleting a garden on one device removes it from the others.
+- **You'll tap "Reconnect" about once per session.** Google only lets a website stay signed in for an hour at a time and won't reopen its sign-in window without a tap. When you open the planner after that, the Sync button at the top says *Reconnect*; one tap and it catches up. Your edits are always safe on the device meanwhile.
+- A new device that hasn't been touched simply takes your cloud gardens. A device that already has gardens adds them to your account. If a different Google account signs in on a device that has someone else's gardens, it asks first and offers to keep them separate (with a backup download).
+- **Sync dialog → More options:** sign out but keep gardens; sign out and clear a shared device; undo what the last sync changed on this device; or delete your cloud copy entirely.
+- Sharing with friends is unchanged: a link or file gives them their own copy. It isn't live co-editing.
 
 ## How the weather adjustment works
 
@@ -76,13 +101,15 @@ The page shows a warning once the outlook is over 100 days old. The summer and a
 
 ## Editing the built-in data
 
-Crop rules are in `src/data.js` and `src/data_v2.js`: base temperature, days to harvest, spacing, frost buffer and so on. Perennials (trees, vines, shrubs) are in `src/data_v2.js`. The advice content (companion pairs, pests, techniques, monthly jobs, crop guide) is in `src/data_advice.js`, and the rules that turn it into findings are in `src/advice.js`. To add a companion pair, add a line to `PAIRS`: the two plants (crop ids or plant families like `@brassica`), `+` for good or `-` for bad, an evidence label (`sci`, `prac`, `mixed`, `trad`), a severity from 1 to 3, and a reason. After editing, run `cd src && python3 build.py` (needs Python 3 and Node). It writes `src/dist/index.html` and `src/dist/outlook.json`; copy those over the ones in the repo root.
+Crop rules are in `src/data.js` and `src/data_v2.js`: base temperature, days to harvest, spacing, frost buffer and so on. Perennials (trees, vines, shrubs) are in `src/data_v2.js`. The sync engine is `src/sync.js` (merge and Google Drive) and `src/ui_sync.js` (sign-in and the Sync dialog). The advice content (companion pairs, pests, techniques, monthly jobs, crop guide) is in `src/data_advice.js`, and the rules that turn it into findings are in `src/advice.js`. To add a companion pair, add a line to `PAIRS`: the two plants (crop ids or plant families like `@brassica`), `+` for good or `-` for bad, an evidence label (`sci`, `prac`, `mixed`, `trad`), a severity from 1 to 3, and a reason. After editing, run `cd src && python3 build.py` (needs Python 3 and Node). It writes `src/dist/index.html` and `src/dist/outlook.json`; copy those over the ones in the repo root.
 
 ## Limits worth knowing
 
 - The model is a guide, not a guarantee. Regional numbers, crop timings and the fruit and vine reference dates are typical values, worth tuning against your own experience (that's what the notes and the calibration inputs are for). Always check the 7-day forecast before planting out tender seedlings.
 - The advice is a guide, written for typical NZ home gardens. It was fact-checked by independent review and corrected, but local conditions vary: your soil, microclimate and local council or industry advice (for example on notifiable pests and spray rules) come first. Pest and disease timing and tree reference dates are approximate.
 - The Advisor's climate band (warm, temperate, cool) is worked out from your latitude and frost dates. Fruit trees aren't counted in the harvest-gap check, only vegetables and flowers.
+- Sync was tested against a mock of Google sign-in and Google Drive (several simulated devices and users, conflicts, offline, expired sign-in, lost updates), not against the real Google services, which the build environment couldn't reach. Expect to do one real sign-in round on two devices after setup; the *If sign-in fails* line above covers the usual causes.
+- Sync limits: two devices replacing the same plan photo at the same time keeps only the last one; two devices adding pots to the same space at the same moment keeps one side; conflicts are settled by each device's clock. On an iPhone, Google's sign-in window can be unreliable from a Home Screen shortcut, so use Safari for the first sign-in. Only the Sync button loads anything from Google, and only once sync is switched on.
 - The live weather calls were tested against mocked responses in a sandbox that couldn't reach Open-Meteo. If a source fails on your device, the Data sources panel says which, and the planner carries on with built-in data.
 - Frost dates from reanalysis data smooth out local frost hollows. If you're in a cold pocket, tag the area as shade or add a cool nudge.
 - Photos you trace over are stored in the browser. They're included in exported `.json` files but not in share links, to keep the links short.

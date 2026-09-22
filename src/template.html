@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Garden Planner">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="config.js" onerror="void 0"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,6 +66,17 @@ em{font-style:normal;color:var(--ink-3)}
 .top .sp{flex:1}
 .datechip{font-size:.82rem;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;background:var(--surface)}
 .themebtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem .8rem;font-size:.82rem;cursor:pointer;color:var(--ink-2)}
+.syncchip{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem .8rem;font-size:.82rem;cursor:pointer;color:var(--ink-2);min-height:32px}
+.syncchip:hover{border-color:var(--accent)}
+.syncchip.warn{border-color:var(--warn-c);color:var(--warn-c);background:var(--warn-bg)} .syncchip.err{border-color:var(--crit);color:var(--crit);background:var(--crit-bg)}
+.sdot{width:.55rem;height:.55rem;border-radius:50%;background:var(--ink-3);flex:none}
+.syncchip.off .sdot{display:none} .syncchip.ok .sdot,.syncstat.ok .sdot{background:var(--good)} .syncchip.busy .sdot,.syncstat.busy .sdot{background:var(--kowhai);animation:sdotp 1s ease-in-out infinite}
+.syncchip.warn .sdot,.syncstat.warn .sdot{background:var(--warn-c)} .syncchip.err .sdot,.syncstat.err .sdot{background:var(--crit)}
+@keyframes sdotp{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){ .syncchip.busy .sdot,.syncstat.busy .sdot{animation:none} }
+.syncstat{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.2rem 0 .6rem}
+.syncmore{padding:.4rem 0}
+.warnbox{border-color:var(--warn-c);background:var(--warn-bg);padding:.8rem 1rem;margin:.7rem 0}
 
 /* shell */
 .app{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
@@ -162,9 +174,13 @@ details.tbl{margin-top:6px} details.tbl summary{cursor:pointer;font-size:.82rem;
 /* results */
 .results{min-width:0}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
-.tab{border:0;background:none;padding:.7rem 1rem;cursor:pointer;font-weight:600;color:var(--ink-3);border-bottom:3px solid transparent;white-space:nowrap;font-size:.95rem}
+.tab{border:0;background:none;padding:.7rem 1rem;cursor:pointer;font-weight:600;color:var(--ink-3);border-bottom:3px solid transparent;white-space:nowrap;font-size:.95rem;flex:none}
 .tab.on{color:var(--ink);border-bottom-color:var(--accent)}
 .tabbody{padding-top:18px;display:flex;flex-direction:column;gap:18px}
+/* the tab bar: a sticky strip near the top of the page, so you can jump between sections without scrolling past
+   the weather settings and season briefing first — most useful on a phone, but kept everywhere for one consistent layout */
+.topnav{position:sticky;top:0;z-index:30;max-width:1240px;margin:0 auto;background:var(--bg);border-bottom:1px solid var(--line)}
+html{scroll-padding-top:64px}
 .empty{padding:24px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--ink-2)}
 .two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px}
 @media (max-width:760px){.two{grid-template-columns:1fr}}
@@ -424,7 +440,7 @@ details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;pad
 @media (max-width:640px){ .advnav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px} .advnav .gchip{flex:none} .bar-row{grid-template-columns:7.5rem 1fr 1.8rem} }
 
 @media print{
-  body{background:#fff;color:#000} .top .themebtn,.datechip,.sidewrap,.picker,.acts,.tabs,.advnav,.toolbar,.icspanel,.actions,.brief,.yc .x,.stp,.btn,.gbar,.tools,.dater,.insp,dialog{display:none!important}
+  body{background:#fff;color:#000} .top .themebtn,.syncchip,.datechip,.sidewrap,.picker,.acts,.tabs,.advnav,.toolbar,.icspanel,.actions,.brief,.yc .x,.stp,.btn,.gbar,.tools,.dater,.insp,dialog{display:none!important}
   .app{display:block} .main{gap:14px}
 }
 @media (prefers-reduced-motion:no-preference){ .bar,.chip,.btn{transition:filter .15s,border-color .15s} }
@@ -437,10 +453,12 @@ details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;pad
     <div><h1>Total Garden Planner 4000</h1><p>Plan around your weather, not the calendar.</p></div>
   </div>
   <span class="sp"></span>
+  <button class="syncchip off" id="syncChip" type="button" data-act="syncchip" aria-label="Sync your gardens between devices"></button>
   <span class="datechip" id="today"></span>
   <button class="themebtn" id="themeBtn" type="button" aria-label="Change colour theme">Theme: auto</button>
 </header>
 <div class="gbar" id="gbar"></div>
+<nav class="topnav tabs" id="topnav" role="tablist" aria-label="Sections"></nav>
 <div class="app">
   <details class="sidewrap" id="sideWrap" open><summary id="sideSum">Your garden &amp; weather settings</summary><div id="side"></div></details>
   <main class="main">
@@ -462,6 +480,7 @@ details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;pad
 /*ADVICE*/
 /*WEATHER*/
 /*STORE*/
+/*SYNC*/
 /*UICORE*/
 /*UIRENDER*/
 /*UICARE*/
@@ -469,6 +488,7 @@ details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;pad
 /*UISITE*/
 /*UICUSTOM*/
 /*UIADVICE*/
+/*UISYNC*/
 </script>
 <script>
 /* header: date chip, theme toggle, mobile settings panel */

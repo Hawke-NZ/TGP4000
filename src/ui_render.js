@@ -324,10 +324,16 @@ function peakAll(list){
 
 /* ---------------- results ---------------- */
 const TABS = [['calendar', 'Calendar'], ['advisor', 'Advisor'], ['site', 'Site plan'], ['care', 'Care'], ['trees', 'Trees & vines'], ['shop', 'Shopping list'], ['track', 'Tracker'], ['notes', 'Notes']];
+/* the tab bar lives in its own sticky strip near the top of the page (#topnav), not inside #results,
+   so you can jump between sections on a phone without scrolling past the weather settings and briefing first */
+function navHtml(){
+  return TABS.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + (t[0] === 'care' && careDueNow() ? ' <span class="badge">' + careDueNow() + '</span>' : '') + (t[0] === 'advisor' && advBadge() ? ' <span class="badge">' + advBadge() + '</span>' : '') + '</button>').join('');
+}
+function renderTopNav(){ const el = $('#topnav'); if (el) el.innerHTML = navHtml(); }
 function renderResults(){
   const _fd = focusDesc();
   if (!TABS.some(t => t[0] === S.tab)) S.tab = 'calendar';
-  const nav = '<div class="tabs" role="tablist">' + TABS.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + (t[0] === 'care' && careDueNow() ? ' <span class="badge">' + careDueNow() + '</span>' : '') + (t[0] === 'advisor' && advBadge() ? ' <span class="badge">' + advBadge() + '</span>' : '') + '</button>').join('') + '</div>';
+  renderTopNav();
   let body = '';
   const need = { calendar: 1, shop: 1, track: 1 }[S.tab];
   if (need && !R.items.length){
@@ -343,7 +349,7 @@ function renderResults(){
   else if (S.tab === 'shop') body = tabShop();
   else if (S.tab === 'track') body = tabTrack();
   else body = tabNotes();
-  $('#results').innerHTML = nav + '<div class="tabbody" role="tabpanel">' + body + '</div>';
+  $('#results').innerHTML = '<div class="tabbody" role="tabpanel">' + body + '</div>';
   if (S.tab === 'site') afterSite();
   if (S.tab === 'trees') afterTrees();
   restoreFocus(_fd);
@@ -495,7 +501,7 @@ function tabTrack(){
 
 /* ---------------- main ---------------- */
 function renderMain(){
-  syncSidebar(); renderGardenBar();
+  syncSidebar(); renderGardenBar(); renderTopNav();
   const sm = $('#sideSum'); if (sm) sm.textContent = 'Settings · ' + R.loc.name;
   renderBriefing(); renderCrops(); renderResults();
 }
@@ -559,7 +565,7 @@ ACT.remove = el => { S.entries = S.entries.filter(x => x.id !== el.dataset.id); 
 ACT.edup = el => { const e = S.entries.find(x => x.id === el.dataset.id); if (e){ S.entries.splice(S.entries.indexOf(e) + 1, 0, { id: uid('e'), crop: e.crop, qty: e.qty, zone: 'auto', how: e.how || 'auto', name: '' }); update(); } };
 ACT.starter = () => { S.entries = starterEntries(); update(); };
 ACT.clear = () => { S.entries = []; update(); };
-ACT.tab = el => { S.tab = el.dataset.t; renderResults(); saveState(); };
+ACT.tab = el => { S.tab = el.dataset.t; renderTopNav(); renderResults(); saveState(); };
 ACT.pick = el => { S.focus = el.dataset.key === S.focus ? null : el.dataset.key; renderResults(); const d = $('.detail'); if (d && S.focus) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); saveState(); };
 ACT.unpick = () => { S.focus = null; renderResults(); };
 ACT.fit = () => { S.fit = true; update(); };

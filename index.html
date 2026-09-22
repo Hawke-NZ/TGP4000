@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Garden Planner">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="config.js" onerror="void 0"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -65,6 +66,17 @@ em{font-style:normal;color:var(--ink-3)}
 .top .sp{flex:1}
 .datechip{font-size:.82rem;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:.3rem .8rem;background:var(--surface)}
 .themebtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem .8rem;font-size:.82rem;cursor:pointer;color:var(--ink-2)}
+.syncchip{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:.3rem .8rem;font-size:.82rem;cursor:pointer;color:var(--ink-2);min-height:32px}
+.syncchip:hover{border-color:var(--accent)}
+.syncchip.warn{border-color:var(--warn-c);color:var(--warn-c);background:var(--warn-bg)} .syncchip.err{border-color:var(--crit);color:var(--crit);background:var(--crit-bg)}
+.sdot{width:.55rem;height:.55rem;border-radius:50%;background:var(--ink-3);flex:none}
+.syncchip.off .sdot{display:none} .syncchip.ok .sdot,.syncstat.ok .sdot{background:var(--good)} .syncchip.busy .sdot,.syncstat.busy .sdot{background:var(--kowhai);animation:sdotp 1s ease-in-out infinite}
+.syncchip.warn .sdot,.syncstat.warn .sdot{background:var(--warn-c)} .syncchip.err .sdot,.syncstat.err .sdot{background:var(--crit)}
+@keyframes sdotp{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){ .syncchip.busy .sdot,.syncstat.busy .sdot{animation:none} }
+.syncstat{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.2rem 0 .6rem}
+.syncmore{padding:.4rem 0}
+.warnbox{border-color:var(--warn-c);background:var(--warn-bg);padding:.8rem 1rem;margin:.7rem 0}
 
 /* shell */
 .app{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
@@ -162,9 +174,13 @@ details.tbl{margin-top:6px} details.tbl summary{cursor:pointer;font-size:.82rem;
 /* results */
 .results{min-width:0}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
-.tab{border:0;background:none;padding:.7rem 1rem;cursor:pointer;font-weight:600;color:var(--ink-3);border-bottom:3px solid transparent;white-space:nowrap;font-size:.95rem}
+.tab{border:0;background:none;padding:.7rem 1rem;cursor:pointer;font-weight:600;color:var(--ink-3);border-bottom:3px solid transparent;white-space:nowrap;font-size:.95rem;flex:none}
 .tab.on{color:var(--ink);border-bottom-color:var(--accent)}
 .tabbody{padding-top:18px;display:flex;flex-direction:column;gap:18px}
+/* the tab bar: a sticky strip near the top of the page, so you can jump between sections without scrolling past
+   the weather settings and season briefing first — most useful on a phone, but kept everywhere for one consistent layout */
+.topnav{position:sticky;top:0;z-index:30;max-width:1240px;margin:0 auto;background:var(--bg);border-bottom:1px solid var(--line)}
+html{scroll-padding-top:64px}
 .empty{padding:24px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--ink-2)}
 .two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px}
 @media (max-width:760px){.two{grid-template-columns:1fr}}
@@ -424,7 +440,7 @@ details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;pad
 @media (max-width:640px){ .advnav{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px} .advnav .gchip{flex:none} .bar-row{grid-template-columns:7.5rem 1fr 1.8rem} }
 
 @media print{
-  body{background:#fff;color:#000} .top .themebtn,.datechip,.sidewrap,.picker,.acts,.tabs,.advnav,.toolbar,.icspanel,.actions,.brief,.yc .x,.stp,.btn,.gbar,.tools,.dater,.insp,dialog{display:none!important}
+  body{background:#fff;color:#000} .top .themebtn,.syncchip,.datechip,.sidewrap,.picker,.acts,.tabs,.advnav,.toolbar,.icspanel,.actions,.brief,.yc .x,.stp,.btn,.gbar,.tools,.dater,.insp,dialog{display:none!important}
   .app{display:block} .main{gap:14px}
 }
 @media (prefers-reduced-motion:no-preference){ .bar,.chip,.btn{transition:filter .15s,border-color .15s} }
@@ -437,10 +453,12 @@ details.pest .pn{font-weight:700} details.pest summary small{flex-basis:100%;pad
     <div><h1>Total Garden Planner 4000</h1><p>Plan around your weather, not the calendar.</p></div>
   </div>
   <span class="sp"></span>
+  <button class="syncchip off" id="syncChip" type="button" data-act="syncchip" aria-label="Sync your gardens between devices"></button>
   <span class="datechip" id="today"></span>
   <button class="themebtn" id="themeBtn" type="button" aria-label="Change colour theme">Theme: auto</button>
 </header>
 <div class="gbar" id="gbar"></div>
+<nav class="topnav tabs" id="topnav" role="tablist" aria-label="Sections"></nav>
 <div class="app">
   <details class="sidewrap" id="sideWrap" open><summary id="sideSum">Your garden &amp; weather settings</summary><div id="side"></div></details>
   <main class="main">
@@ -3021,22 +3039,28 @@ function loadStore(){
     const raw = localStorage.getItem(STORE_KEY);
     if (raw){
       const o = JSON.parse(raw);
-      if (o && o.v === 2 && o.gardens && o.order && o.order.length){ o.custom = o.custom || []; o.overrides = o.overrides || {}; Object.keys(o.gardens).forEach(k => fillGarden(o.gardens[k])); return o; }
+      if (o && o.v === 2 && o.gardens && o.order && o.order.length){ o.custom = o.custom || []; o.overrides = o.overrides || {}; o.tomb = o.tomb || {}; Object.keys(o.gardens).forEach(k => fillGarden(o.gardens[k])); return o; }
     }
   } catch(e){}
   let g = null;
   try { const raw1 = localStorage.getItem(V1_KEY); if (raw1) g = migrateV1(JSON.parse(raw1)); } catch(e){}
   if (!g){ g = newGarden('My garden'); g.entries = starterEntries(); }
-  return { v: 2, cur: g.id, order: [g.id], gardens: { [g.id]: g }, custom: [], overrides: {} };
+  return { v: 2, cur: g.id, order: [g.id], gardens: { [g.id]: g }, custom: [], overrides: {}, tomb: {} };
 }
 let _saveTimer = null;
+function writeStore(){
+  _saveTimer = null;
+  try { if (typeof syncStamp === 'function') syncStamp(); } catch(e){}      /* note which gardens changed (for cloud sync) */
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(STORE)); STORE_ERR = null; }
+  catch(e){ STORE_ERR = 'This browser wouldn’t save your changes (storage full or blocked). Use Share → Export to keep a copy.'; }
+  try { if (typeof syncNotify === 'function') syncNotify(); } catch(e){}
+}
 function saveStore(){
   clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(STORE)); STORE_ERR = null; }
-    catch(e){ STORE_ERR = 'This browser wouldn’t save your changes (storage full or blocked). Use Share → Export to keep a copy.'; }
-  }, 250);
+  _saveTimer = setTimeout(writeStore, 250);
 }
+/* write straight away (used before a cloud sync and when the page is closing) */
+function flushStore(){ if (_saveTimer){ clearTimeout(_saveTimer); writeStore(); } }
 
 /* ---------- photos ---------- */
 const BG = {};
@@ -3102,6 +3126,7 @@ function duplicateGarden(id, keepLogs){
 function deleteGarden(id){
   if (STORE.order.length < 2) return false;
   delete STORE.gardens[id]; STORE.order = STORE.order.filter(x => x !== id);
+  (STORE.tomb = STORE.tomb || {})[id] = Date.now();                       /* so the deletion reaches your other devices */
   try { localStorage.removeItem(BG_PREFIX + id); } catch(e){}
   delete BG[id];
   if (STORE.cur === id) STORE.cur = STORE.order[0];
@@ -3191,6 +3216,449 @@ async function unpackShare(s){
 }
 
 if (typeof module !== 'undefined') module.exports = { newGarden, defaultZone, migrateV1, normalizeCrop, packShare, unpackShare };
+
+/* ============================================================
+   SYNC — optional sync between your devices through YOUR OWN Google Drive.
+   Each person signs in with their own Google account. Their gardens are written to the hidden
+   "app data" folder of their own Drive, which only this planner can open (scope drive.appdata).
+   Nothing goes to any server run by whoever hosts this page, so friends stay completely separate.
+
+   How the merge works: every garden is one file. Each device remembers the version it last synced (the "base").
+   When both sides have changed, a three-way merge compares base, this device and the cloud:
+   plants, spaces, notes and log entries are merged one by one (by id), so two devices adding different things
+   both keep them. Only a genuine clash on the same value falls back to "most recent edit wins".
+   Deleted gardens are remembered as tombstones so a deletion reaches every device.
+   ============================================================ */
+const SYNC_VER = 1;
+const SYNC_KEY = 'tgp4000.sync', SYNC_TOKEN_KEY = 'tgp4000.sync.tok', SYNC_BASE_KEY = 'tgp4000.sync.base', SYNC_BAK_KEY = 'tgp4000.sync.bak', SYNC_CID_KEY = 'tgp4000.sync.cid';
+const DRIVE_API = 'https://www.googleapis.com/drive/v3/files', DRIVE_UP = 'https://www.googleapis.com/upload/drive/v3/files';
+const SYNC_SCOPE = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email';
+const ACCT_NAME = 'tgp-account.json';
+const gname = id => 'tgp-g-' + id + '.json', bgname = id => 'tgp-bg-' + id + '.json';
+const TOMB_DAYS = 90, LOCAL_ONLY = ['tab', 'viewT', 'focus', 'mod'];
+
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch(e){ return false; } };
+const lsDel = k => { try { localStorage.removeItem(k); } catch(e){} };
+const jget = k => { try { return JSON.parse(lsGet(k)); } catch(e){ return null; } };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- comparing and hashing ---------- */
+const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
+function deq(a, b){
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)){ if (a.length !== b.length) return false; for (let i = 0; i < a.length; i++) if (!deq(a[i], b[i])) return false; return true; }
+  const ka = Object.keys(a).filter(k => a[k] !== undefined), kb = Object.keys(b).filter(k => b[k] !== undefined);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka){ if (b[k] === undefined || !deq(a[k], b[k])) return false; }
+  return true;
+}
+/* cyrb53: a fast, well-spread 53-bit string hash (not for security — only to notice changes) */
+function h53(str){
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++){ const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+/* ---------- three-way merge ----------
+   base = what both sides last agreed on (may be undefined), L = this device, R = the cloud.
+   pref = which side wins a genuine clash on a single value ('L' or 'R'). */
+const hasIds = a => a.length > 0 && a.every(x => isObj(x) && typeof x.id === 'string');
+function m3(base, L, R, pref){
+  if (deq(L, R)) return clone(L);
+  if (base !== undefined){
+    if (deq(L, base)) return clone(R);
+    if (deq(R, base)) return clone(L);
+  }
+  const win = () => clone(pref === 'R' ? R : L);
+  if (isObj(L) && isObj(R)){
+    const B = isObj(base) ? base : {}, out = {};
+    const keys = Object.keys(L).concat(Object.keys(R).filter(k => !(k in L)));
+    keys.forEach(k => {
+      const inL = L[k] !== undefined, inR = R[k] !== undefined, b = B[k];
+      if (inL && inR) out[k] = m3(b, L[k], R[k], pref);
+      else if (inL){ if (b === undefined || !deq(L[k], b)) out[k] = clone(L[k]); }      /* gone from the cloud: keep it unless we hadn't touched it */
+      else if (inR){ if (b === undefined || !deq(R[k], b)) out[k] = clone(R[k]); }      /* gone from this device: same rule */
+    });
+    return out;
+  }
+  if (Array.isArray(L) && Array.isArray(R)){
+    const B = Array.isArray(base) ? base : [];
+    if ((hasIds(L) || !L.length) && (hasIds(R) || !R.length) && (hasIds(B) || !B.length)){
+      const idx = a => { const m = new Map(); a.forEach(x => m.set(x.id, x)); return m; };
+      const bm = idx(B), lm = idx(L), rm = idx(R), out = [];
+      /* the winning side's order first, then anything only the other side has: both devices reach the same order */
+      const P = pref === 'R' ? R : L, Q = pref === 'R' ? L : R, pm = pref === 'R' ? rm : lm;
+      const ids = P.map(x => x.id).concat(Q.filter(x => !pm.has(x.id)).map(x => x.id));
+      ids.forEach(id => {
+        const b = bm.get(id), l = lm.get(id), r = rm.get(id);
+        if (l && r) out.push(m3(b, l, r, pref));
+        else if (l){ if (!b || !deq(l, b)) out.push(clone(l)); }
+        else if (r){ if (!b || !deq(r, b)) out.push(clone(r)); }
+      });
+      return out;
+    }
+    if (L.every(x => typeof x === 'string') && R.every(x => typeof x === 'string') && B.every(x => typeof x === 'string')){
+      const out = [], P = pref === 'R' ? R : L, Q = pref === 'R' ? L : R;
+      const keep = (x, o) => !(B.indexOf(x) >= 0 && o.indexOf(x) < 0);       /* dropped by the other side and untouched here → gone */
+      P.forEach(x => { if (keep(x, Q) && out.indexOf(x) < 0) out.push(x); });
+      Q.forEach(x => { if (P.indexOf(x) < 0 && B.indexOf(x) < 0 && out.indexOf(x) < 0) out.push(x); });
+      return out;
+    }
+  }
+  return win();
+}
+
+/* ---------- what gets synced ---------- */
+/* a garden without the things that belong to this device only (which tab you're on, the view, what's selected) */
+function gdoc(g){
+  const d = clone(g); LOCAL_ONLY.forEach(k => delete d[k]);
+  if (d.adv) delete d.adv.sec;
+  return d;
+}
+const gHash = g => h53(JSON.stringify(gdoc(g)));
+function acctDoc(){ return { order: STORE.order.slice(), custom: clone(STORE.custom), overrides: clone(STORE.overrides), tomb: clone(STORE.tomb || {}) }; }
+const aHash = () => h53(JSON.stringify(acctDoc()));
+
+/* which gardens/settings have changed since we last looked → stamp them with the time (used to settle clashes) */
+const LASTH = {}; let LASTA = null, SYNC_DIRTY = false;
+function syncInit(){
+  Object.keys(STORE.gardens).forEach(id => { const g = STORE.gardens[id]; LASTH[id] = gHash(g); if (!g.mod) g.mod = g.created || Date.now(); });
+  if (!STORE.amod) STORE.amod = Date.now();
+  LASTA = aHash();
+}
+function syncStamp(){
+  let changed = false;
+  Object.keys(STORE.gardens).forEach(id => {
+    const g = STORE.gardens[id], h = gHash(g);
+    if (LASTH[id] !== h){ LASTH[id] = h; g.mod = Date.now(); changed = true; }
+  });
+  Object.keys(LASTH).forEach(id => { if (!STORE.gardens[id]) delete LASTH[id]; });
+  const a = aHash(); if (a !== LASTA){ LASTA = a; STORE.amod = Date.now(); changed = true; }
+  if (changed) SYNC_DIRTY = true;
+  return changed;
+}
+
+/* a brand-new install that hasn't been touched (so signing in on it should simply take your cloud gardens) */
+function pristineShape(g){
+  const d = gdoc(g); delete d.id; delete d.created;
+  d.entries = (d.entries || []).map(e => ({ crop: e.crop, qty: e.qty, zone: e.zone, how: e.how, name: e.name }));
+  d.zones = (d.zones || []).map(z => { const c = Object.assign({}, z); delete c.id; return c; });
+  return d;
+}
+function isPristine(){
+  if (STORE.order.length !== 1 || STORE.custom.length || Object.keys(STORE.overrides).length || Object.keys(STORE.tomb || {}).length) return false;
+  const g = STORE.gardens[STORE.order[0]]; if (!g) return false;
+  const ref = fillGarden(newGarden('My garden')); ref.entries = starterEntries();
+  return deq(pristineShape(g), pristineShape(ref));       /* every setting exactly as a brand-new install has it */
+}
+
+/* ---------- state kept on this device (never uploaded) ---------- */
+const SYNC = Object.assign({ on: false, email: '', owner: '', last: 0 }, jget(SYNC_KEY) || {});
+SYNC.state = SYNC.on ? 'idle' : 'off';     /* off · idle · syncing · ok · auth · offline · error */
+SYNC.msg = ''; SYNC.busy = false; SYNC.again = false; SYNC.note = '';
+let SBASE = null;
+function blankBase(){ return { acct: null, am: {}, g: {}, m: {}, bg: {}, seen: {}, mine: {}, prev: {} }; }     /* prev: what the cloud held just before our last write (to recover if someone overwrites it) */
+function loadBase(){ const b = jget(SYNC_BASE_KEY) || {}; const o = blankBase(); Object.keys(o).forEach(k => { if (b[k] && typeof b[k] === 'object') o[k] = b[k]; }); return o; }
+SBASE = loadBase();
+const saveSync = () => lsSet(SYNC_KEY, JSON.stringify({ on: SYNC.on, email: SYNC.email, owner: SYNC.owner, last: SYNC.last }));
+function saveBase(){
+  /* never throw away the stored base if storage is tight: free the undo backup, then the recovery copies, and keep the old base if it still won't fit */
+  const ser = () => JSON.stringify(SBASE);
+  if (lsSet(SYNC_BASE_KEY, ser())) return true;
+  lsDel(SYNC_BAK_KEY); if (lsSet(SYNC_BASE_KEY, ser())) return true;
+  const p = SBASE.prev; SBASE.prev = {}; if (lsSet(SYNC_BASE_KEY, ser())) return true;
+  SBASE.prev = p; SYNC.note = 'This browser is short of storage, so sync couldn’t save its progress.'; return false;
+}
+function resetBase(){ SBASE = blankBase(); lsDel(SYNC_BASE_KEY); }
+
+/* sign-in token (Google gives an hour). Kept so a reload inside the hour doesn't ask again. */
+let TOK = jget(SYNC_TOKEN_KEY);
+const tokenOk = () => !!(TOK && TOK.t && Date.now() < TOK.exp - 30000);
+function setToken(t, secs){ TOK = { t, exp: Date.now() + (secs || 3600) * 1000 }; lsSet(SYNC_TOKEN_KEY, JSON.stringify(TOK)); }
+function dropToken(){ TOK = null; lsDel(SYNC_TOKEN_KEY); }
+
+class SyncErr extends Error { constructor(kind, msg){ super(msg || kind); this.kind = kind; this.msg = msg || ''; } }
+
+/* ---------- Google Drive (app data folder) ---------- */
+async function gfetch(url, opts, tries){
+  tries = tries || 0;
+  if (!tokenOk()) throw new SyncErr('auth');
+  opts = opts || {}; opts.headers = Object.assign({ Authorization: 'Bearer ' + TOK.t }, opts.headers || {});
+  let res; const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 60000);
+  opts.signal = ac.signal;
+  try { res = await fetch(url, opts); } catch(e){ throw new SyncErr('net', e && e.name === 'AbortError' ? 'Google Drive took too long to answer.' : e.message); } finally { clearTimeout(tm); }
+  if (res.status === 401){ dropToken(); throw new SyncErr('auth'); }
+  if ((res.status === 429 || res.status >= 500) && tries < 3){ await sleep(700 * Math.pow(2, tries)); return gfetch(url, opts, tries + 1); }
+  if (res.status === 403){
+    const t = await res.text().catch(() => '');
+    if (/rateLimit/i.test(t) && tries < 3){ await sleep(900 * Math.pow(2, tries)); return gfetch(url, opts, tries + 1); }
+    if (/storageQuota|quotaExceeded/i.test(t)) throw new SyncErr('full', 'Your Google Drive is full.');
+    throw new SyncErr('http', '403 ' + t.slice(0, 160));
+  }
+  if (!res.ok) throw new SyncErr('http', String(res.status));
+  return res;
+}
+async function driveList(){
+  const out = []; let pt = '';
+  do {
+    const u = DRIVE_API + '?spaces=appDataFolder&pageSize=1000&fields=' + encodeURIComponent('nextPageToken,files(id,name,createdTime,modifiedTime,md5Checksum,size,appProperties)') + (pt ? '&pageToken=' + encodeURIComponent(pt) : '');
+    const j = await (await gfetch(u)).json();
+    (j.files || []).forEach(f => out.push(f)); pt = j.nextPageToken || '';
+  } while (pt);
+  return out;
+}
+async function driveGetJson(id){
+  const t = await (await gfetch(DRIVE_API + '/' + id + '?alt=media')).text();
+  try { return JSON.parse(t); } catch(e){ throw new SyncErr('data', 'A synced file couldn’t be read.'); }
+}
+async function drivePut(name, obj, id, props){
+  const b = 'tgp' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  const meta = id ? {} : { name, parents: ['appDataFolder'] }; if (props) meta.appProperties = props;
+  const body = '--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(obj) + '\r\n--' + b + '--';
+  const fields = 'id,name,createdTime,modifiedTime,md5Checksum,size,appProperties';
+  const url = (id ? DRIVE_UP + '/' + id : DRIVE_UP) + '?uploadType=multipart&fields=' + encodeURIComponent(fields);
+  const res = await gfetch(url, { method: id ? 'PATCH' : 'POST', headers: { 'Content-Type': 'multipart/related; boundary=' + b }, body });
+  return res.json();
+}
+async function driveDel(id){
+  try { await gfetch(DRIVE_API + '/' + id, { method: 'DELETE' }); }
+  catch(e){ if (!(e instanceof SyncErr && e.msg === '404')) throw e; }
+}
+const ftok = f => (f.md5Checksum || '') + '|' + (f.modifiedTime || '') + '|' + (f.size || '');
+function readEnv(json){
+  if (!json || typeof json !== 'object' || (json.garden === undefined && json.acct === undefined)) throw new SyncErr('data', 'A synced file has an unexpected format.');
+  if ((json.v || 1) > SYNC_VER) throw new SyncErr('newer', 'Another device saved this with a newer version of the planner. Reload this page to update it.');
+  return { doc: json.garden !== undefined ? json.garden : json.acct, mod: json.mod || 0, revs: Array.isArray(json.revs) ? json.revs : [] };
+}
+
+/* ---------- photos ---------- */
+const BGH = {};
+function bgHash(gid, data){
+  const k = data.length + ':' + data.slice(0, 40) + data.slice(-40), c = BGH[gid];
+  if (c && c.k === k) return c.h;
+  const h = h53(data); BGH[gid] = { k, h }; return h;
+}
+const BG_MAX = 4600000;
+
+/* ---------- applying a merged garden to this device ---------- */
+function putGarden(gid, doc, mod){
+  const old = STORE.gardens[gid], g = fillGarden(clone(doc));
+  g.id = gid; g.mod = mod || Date.now();
+  if (old){ g.tab = old.tab; g.viewT = old.viewT; g.focus = old.focus; if (old.adv && old.adv.sec) g.adv.sec = old.adv.sec; }
+  else { g.tab = 'calendar'; g.viewT = null; g.focus = null; }
+  g.entries = g.entries || []; g.zones = g.zones || []; g.trees = g.trees || []; g.notes = g.notes || {}; g.prog = g.prog || {};
+  STORE.gardens[gid] = g; LASTH[gid] = gHash(g);
+  if (STORE.cur === gid) S = g;
+}
+function removeLocalGarden(gid){
+  delete STORE.gardens[gid]; delete LASTH[gid]; delete SBASE.g[gid]; delete SBASE.m[gid]; delete SBASE.mine[gid]; delete SBASE.bg[gid];
+  STORE.order = STORE.order.filter(x => x !== gid);
+  try { localStorage.removeItem(BG_PREFIX + gid); } catch(e){} delete BG[gid];
+}
+function usedCustomIds(){
+  const s = new Set(); Object.keys(STORE.gardens).forEach(k => (STORE.gardens[k].entries || []).forEach(e => s.add(e.crop))); return s;
+}
+
+/* ============================================================
+   one sync round: read the cloud → merge here (in one uninterrupted step, so nothing you type is lost) → write back
+   ============================================================ */
+async function syncCycle(){
+  flushStore();
+  /* ---- 1. read ---- */
+  const files = await driveList();
+  files.sort((a, b) => (a.createdTime || '').localeCompare(b.createdTime || '') || a.id.localeCompare(b.id));
+  const byName = {}, dups = [];
+  files.forEach(f => { if (byName[f.name]) dups.push(f); else byName[f.name] = f; });
+  const first = !SBASE.acct && !Object.keys(SBASE.g).length;
+  const remoteIds = Object.keys(byName).map(n => (/^tgp-g-(.+)\.json$/.exec(n) || [])[1]).filter(Boolean);
+
+  let racct = null, acctBad = false;
+  const af = byName[ACCT_NAME], acctDups = dups.filter(x => x.name === ACCT_NAME);
+  if (af){
+    if (SBASE.acct && SBASE.seen[ACCT_NAME] === ftok(af) && !acctDups.length) racct = { doc: SBASE.acct, mod: SBASE.am.mod || 0, revs: SBASE.am.revs || [], cached: true };
+    else {
+      try {
+        racct = readEnv(await driveGetJson(af.id));
+        for (const d of acctDups){          /* two devices created it at once: fold them together */
+          const e2 = readEnv(await driveGetJson(d.id));
+          racct = { doc: m3(undefined, racct.doc, e2.doc, racct.mod >= e2.mod ? 'L' : 'R'), mod: Math.max(racct.mod, e2.mod), revs: racct.revs.concat(e2.revs), cached: false };
+          racct.doc.tomb = Object.assign({}, e2.doc.tomb || {}, racct.doc.tomb || {});
+        }
+      } catch(e){
+        if (e instanceof SyncErr && (e.kind === 'data' || e.msg === '404')){ racct = null; acctBad = true; SYNC.note = 'The synced settings file couldn’t be read, so it was left alone this time.'; }
+        else throw e;
+      }
+    }
+  }
+  const renv = {}, bad = {};
+  for (const gid of remoteIds){
+    const f = byName[gname(gid)];
+    if (SBASE.g[gid] && SBASE.seen[f.name] === ftok(f)) renv[gid] = { doc: SBASE.g[gid], mod: (SBASE.m[gid] || {}).mod || 0, revs: (SBASE.m[gid] || {}).revs || [], cached: true };
+    else {
+      try { renv[gid] = readEnv(await driveGetJson(f.id)); }
+      catch(e){
+        if (e instanceof SyncErr && e.kind === 'data'){ bad[gid] = 1; SYNC.note = 'One synced garden couldn’t be read, so it was left alone.'; }
+        else if (e instanceof SyncErr && e.msg === '404'){ bad[gid] = 1; }       /* deleted while we were reading: next round sorts it out */
+        else throw e;
+      }
+    }
+  }
+
+  /* ---- 2. merge (no awaits from here to the end of this block) ---- */
+  if (!syncCanApply()) return { retry: true };
+  syncStamp(); SYNC_DIRTY = false;         /* everything up to now is being handled by this round */
+  const now = Date.now(), out = { uploads: [], deletes: [], applied: false, pulled: 0, pushed: 0 };
+  let bakDone = false;
+  const backup = () => { if (!bakDone){ bakDone = true; lsSet(SYNC_BAK_KEY, JSON.stringify({ t: now, store: STORE })); } };
+  const baseFor = (rv, mine, base, key) => { if (rv && !rv.cached && mine && mine.rev && rv.revs.indexOf(mine.rev) >= 0) delete SBASE.prev[key]; return baseFor2(rv, mine, base, key); };
+  const baseFor2 = (rv, mine, base, key) => (rv && !rv.cached && mine && mine.rev && rv.revs.indexOf(mine.rev) < 0 && !deq(rv.doc, base)) ? (SBASE.prev[key] == null ? undefined : SBASE.prev[key]) : base;
+
+  if (first && remoteIds.length && isPristine()){ backup(); Object.keys(STORE.gardens).forEach(id => { delete STORE.gardens[id]; delete LASTH[id]; }); STORE.order = []; out.applied = true; }
+
+  /* the account-wide part: order, custom crops, edited crops, deletions */
+  const La = acctDoc(), Ba = SBASE.acct || undefined;
+  let Ma;
+  if (!racct) Ma = clone(La);
+  else {
+    Ma = m3(baseFor(racct, SBASE.mine[ACCT_NAME], Ba, ACCT_NAME), La, racct.doc, (STORE.amod || 0) >= (racct.mod || 0) ? 'L' : 'R');
+    Ma.tomb = Object.assign({}, racct.doc.tomb || {}); Object.keys(La.tomb).forEach(k => { Ma.tomb[k] = Math.max(Ma.tomb[k] || 0, La.tomb[k]); });
+  }
+  Ma.tomb = Ma.tomb || {}; Object.keys(Ma.tomb).forEach(k => { if (now - Ma.tomb[k] > TOMB_DAYS * 86400000) delete Ma.tomb[k]; });
+
+  const ids = STORE.order.filter(id => STORE.gardens[id]).concat(remoteIds.filter(id => !STORE.gardens[id]));
+  const gNew = {};      /* garden id → { env, mod, prev } to upload, or null when already in step */
+  ids.forEach(gid => {
+    if (bad[gid]) return;
+    const g = STORE.gardens[gid], rv = renv[gid], file = byName[gname(gid)], ts = Ma.tomb[gid];
+    if (ts){
+      const alive = Math.max(g ? g.mod || 0 : 0, rv ? rv.mod || 0 : 0) > ts;
+      if (!alive){
+        if (g){ backup(); removeLocalGarden(gid); out.applied = true; }
+        [gname(gid), bgname(gid)].forEach(n => { if (byName[n]) out.deletes.push(byName[n]); });
+        delete SBASE.g[gid]; delete SBASE.m[gid]; delete SBASE.mine[gid]; delete SBASE.bg[gid];
+        return;
+      }
+      delete Ma.tomb[gid];
+    }
+    if (g && rv){
+      const Ld = gdoc(g), b = baseFor(rv, SBASE.mine[gid], SBASE.g[gid], gid);
+      const M = m3(b, Ld, rv.doc, (g.mod || 0) >= (rv.mod || 0) ? 'L' : 'R');
+      const toLocal = !deq(M, Ld), toRemote = !deq(M, rv.doc);
+      const mod = toLocal && toRemote ? now : toLocal ? rv.mod : g.mod;
+      if (toLocal){ backup(); putGarden(gid, M, mod); out.applied = true; out.pulled++; }
+      if (toRemote) gNew[gid] = { doc: M, mod, prev: rv.doc, revs: rv.revs, file };
+      else { SBASE.g[gid] = M; SBASE.m[gid] = { mod, revs: rv.revs }; if (file) SBASE.seen[file.name] = ftok(file); }
+    } else if (!g && rv){
+      backup(); putGarden(gid, rv.doc, rv.mod); out.applied = true; out.pulled++;
+      SBASE.g[gid] = rv.doc; SBASE.m[gid] = { mod: rv.mod, revs: rv.revs }; if (file) SBASE.seen[file.name] = ftok(file);
+      if (STORE.order.indexOf(gid) < 0) STORE.order.push(gid);
+    } else if (g && !rv){
+      gNew[gid] = { doc: gdoc(g), mod: g.mod || now, prev: null, revs: [], file: null };
+    }
+  });
+
+  /* apply the account-wide part */
+  const beforeCustom = JSON.stringify([STORE.custom, STORE.overrides]);
+  STORE.custom = Ma.custom || []; STORE.overrides = Ma.overrides || {}; STORE.tomb = Ma.tomb;
+  const used = usedCustomIds();       /* never let a crop disappear from under a garden that still uses it */
+  used.forEach(cid => {
+    if (BASE_CROPS.find(b => b.id === cid) || STORE.custom.find(c => c.id === cid)) return;
+    const src = [La.custom, racct && racct.doc.custom, Ba && Ba.custom].map(a => (a || []).find(c => c.id === cid)).find(Boolean);
+    if (src) STORE.custom.push(clone(src));
+  });
+  let order = (Ma.order || []).filter(id => STORE.gardens[id]);
+  STORE.order.forEach(id => { if (order.indexOf(id) < 0) order.push(id); });
+  Object.keys(STORE.gardens).forEach(id => { if (order.indexOf(id) < 0) order.push(id); });
+  STORE.order = order;
+  if (!STORE.order.length){ const g = newGarden('My garden'); STORE.gardens[g.id] = g; STORE.order = [g.id]; LASTH[g.id] = gHash(g); g.mod = now; gNew[g.id] = { doc: gdoc(g), mod: now, prev: null, revs: [], file: null }; }
+  if (!STORE.gardens[STORE.cur]){ STORE.cur = STORE.order[0]; out.applied = true; }
+  S = curGarden();
+  if (beforeCustom !== JSON.stringify([STORE.custom, STORE.overrides])) out.applied = true;
+  if (out.applied) rebuildCrops();
+
+  const Mf = acctDoc();
+  const aToLocal = !deq(Mf, La), aToRemote = !acctBad && (!racct || !deq(Mf, racct.doc) || acctDups.length > 0);
+  if (aToLocal) STORE.amod = aToRemote ? now : (racct ? racct.mod : now);
+  LASTA = aHash();
+  const acctUp = aToRemote ? { doc: Mf, mod: STORE.amod || now, prev: racct ? racct.doc : null, revs: racct ? racct.revs : [], file: af || null } : null;
+  if (!aToRemote && racct){ SBASE.acct = Mf; SBASE.am = { mod: racct.mod, revs: racct.revs }; SBASE.seen[ACCT_NAME] = ftok(af); }
+  if (out.applied) syncApplied();
+
+  /* ---- 3. write ---- */
+  const rev = () => 'r' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+  const put = async (name, key, u, isAcct) => {
+    const r = rev(), revs = u.revs.concat(r).slice(-40);
+    const meta = await drivePut(name, isAcct ? { v: SYNC_VER, mod: u.mod, revs, acct: u.doc } : { v: SYNC_VER, id: key, mod: u.mod, revs, garden: u.doc }, u.file && u.file.id, null);
+    SBASE.seen[name] = ftok(meta); SBASE.mine[key] = { rev: r }; if (u.prev != null) SBASE.prev[key] = u.prev; else delete SBASE.prev[key];
+    if (isAcct){ SBASE.acct = u.doc; SBASE.am = { mod: u.mod, revs }; } else { SBASE.g[key] = u.doc; SBASE.m[key] = { mod: u.mod, revs }; }
+    out.pushed++;
+  };
+  try {
+    if (acctUp) await put(ACCT_NAME, ACCT_NAME, acctUp, true);
+    for (const gid of Object.keys(gNew)) await put(gname(gid), gid, gNew[gid], false);
+    for (const f of out.deletes.concat(acctUp ? acctDups : [])){ await driveDel(f.id); delete SBASE.seen[f.name]; }
+
+    /* photos: a plan photo lives in its own file so a big photo is only sent when it changes */
+    let bgApplied = false;
+    for (const gid of Object.keys(STORE.gardens)){
+      const g = STORE.gardens[gid], local = bgGet(gid), lh = local ? bgHash(gid, local) : '';
+      const st = SBASE.bg[gid] || (SBASE.bg[gid] = { h: '' }), rf = byName[bgname(gid)], rh = (rf && rf.appProperties && rf.appProperties.h) || '';
+      if (!g.plan || !g.plan.bg){
+        if (lh && lh === st.h){ bgSet(gid, null); bgApplied = true; }
+        if (rf){ await driveDel(rf.id); delete SBASE.seen[rf.name]; }
+        st.h = ''; continue;
+      }
+      if (lh && lh !== st.h){
+        if (local.length > BG_MAX){ SYNC.note = 'A plan photo is too large to sync (' + g.name + ').'; continue; }
+        const meta = await drivePut(bgname(gid), { v: SYNC_VER, h: lh, data: local }, rf && rf.id, { h: lh });
+        st.h = lh; SBASE.seen[bgname(gid)] = ftok(meta); out.pushed++;
+      } else if (rf && rh && (!lh || rh !== st.h)){
+        try {
+          const j = await driveGetJson(rf.id);
+          if (j && typeof j.data === 'string' && /^data:image\//.test(j.data)){ if (bgSet(gid, j.data)){ st.h = rh; bgApplied = true; } }
+        } catch(e){ if (!(e instanceof SyncErr && (e.kind === 'data' || e.msg === '404'))) throw e; }
+      }
+    }
+    if (bgApplied) syncApplied();
+  } finally { saveBase(); }
+  return out;
+}
+
+/* ---------- scheduling ---------- */
+let _syncTimer = null, _pollTimer = null;
+function syncNotify(){                      /* called after every local save */
+  if (!SYNC_DIRTY) return; SYNC_DIRTY = false;
+  if (SYNC.on) syncSoon(6000);
+}
+function syncSoon(ms){ clearTimeout(_syncTimer); _syncTimer = setTimeout(() => syncNow('change'), ms == null ? 1500 : ms); }
+async function syncNow(reason, o){
+  o = o || {};
+  if (!SYNC.on) return;
+  if (SYNC.busy){ SYNC.again = true; return; }
+  clearTimeout(_syncTimer);                  /* this round covers any change that was waiting */
+  if (!syncCanApply() && reason !== 'manual' && reason !== 'connect'){ syncSoon(2800); return; }
+  if (!tokenOk()){ SYNC.state = 'auth'; SYNC.msg = ''; syncRender(); return; }
+  SYNC.busy = true; SYNC.state = 'syncing'; SYNC.msg = ''; SYNC.note = ''; syncRender();
+  try {
+    const r = await syncCycle();
+    if (r && r.retry){ SYNC.state = 'idle'; syncSoon(3000); }
+    else { SYNC.state = 'ok'; SYNC.last = Date.now(); SYNC.lastOut = r; saveSync(); }
+  } catch(e){
+    if (e instanceof SyncErr){
+      SYNC.state = e.kind === 'auth' ? 'auth' : e.kind === 'net' ? 'offline' : 'error';
+      SYNC.msg = e.kind === 'net' ? '' : e.kind === 'http' ? 'Google Drive said “' + e.msg + '”. It will try again.' : e.msg;
+    } else { SYNC.state = 'error'; SYNC.msg = 'Something went wrong while syncing (' + (e && e.message || e) + ').'; if (window.console) console.warn('sync', e); }
+  }
+  SYNC.busy = false; syncRender();
+  if (SYNC.again){ SYNC.again = false; syncSoon(800); }
+}
+
+if (typeof module !== 'undefined') module.exports = { m3, deq, h53, gdoc };
 
 /* ============================================================
    UI CORE — current garden, live-data orchestration, compute()
@@ -3712,10 +4180,16 @@ function peakAll(list){
 
 /* ---------------- results ---------------- */
 const TABS = [['calendar', 'Calendar'], ['advisor', 'Advisor'], ['site', 'Site plan'], ['care', 'Care'], ['trees', 'Trees & vines'], ['shop', 'Shopping list'], ['track', 'Tracker'], ['notes', 'Notes']];
+/* the tab bar lives in its own sticky strip near the top of the page (#topnav), not inside #results,
+   so you can jump between sections on a phone without scrolling past the weather settings and briefing first */
+function navHtml(){
+  return TABS.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + (t[0] === 'care' && careDueNow() ? ' <span class="badge">' + careDueNow() + '</span>' : '') + (t[0] === 'advisor' && advBadge() ? ' <span class="badge">' + advBadge() + '</span>' : '') + '</button>').join('');
+}
+function renderTopNav(){ const el = $('#topnav'); if (el) el.innerHTML = navHtml(); }
 function renderResults(){
   const _fd = focusDesc();
   if (!TABS.some(t => t[0] === S.tab)) S.tab = 'calendar';
-  const nav = '<div class="tabs" role="tablist">' + TABS.map(t => '<button role="tab" class="tab ' + (S.tab === t[0] ? 'on' : '') + '" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-t="' + t[0] + '" type="button">' + t[1] + (t[0] === 'care' && careDueNow() ? ' <span class="badge">' + careDueNow() + '</span>' : '') + (t[0] === 'advisor' && advBadge() ? ' <span class="badge">' + advBadge() + '</span>' : '') + '</button>').join('') + '</div>';
+  renderTopNav();
   let body = '';
   const need = { calendar: 1, shop: 1, track: 1 }[S.tab];
   if (need && !R.items.length){
@@ -3731,7 +4205,7 @@ function renderResults(){
   else if (S.tab === 'shop') body = tabShop();
   else if (S.tab === 'track') body = tabTrack();
   else body = tabNotes();
-  $('#results').innerHTML = nav + '<div class="tabbody" role="tabpanel">' + body + '</div>';
+  $('#results').innerHTML = '<div class="tabbody" role="tabpanel">' + body + '</div>';
   if (S.tab === 'site') afterSite();
   if (S.tab === 'trees') afterTrees();
   restoreFocus(_fd);
@@ -3883,7 +4357,7 @@ function tabTrack(){
 
 /* ---------------- main ---------------- */
 function renderMain(){
-  syncSidebar(); renderGardenBar();
+  syncSidebar(); renderGardenBar(); renderTopNav();
   const sm = $('#sideSum'); if (sm) sm.textContent = 'Settings · ' + R.loc.name;
   renderBriefing(); renderCrops(); renderResults();
 }
@@ -3947,7 +4421,7 @@ ACT.remove = el => { S.entries = S.entries.filter(x => x.id !== el.dataset.id); 
 ACT.edup = el => { const e = S.entries.find(x => x.id === el.dataset.id); if (e){ S.entries.splice(S.entries.indexOf(e) + 1, 0, { id: uid('e'), crop: e.crop, qty: e.qty, zone: 'auto', how: e.how || 'auto', name: '' }); update(); } };
 ACT.starter = () => { S.entries = starterEntries(); update(); };
 ACT.clear = () => { S.entries = []; update(); };
-ACT.tab = el => { S.tab = el.dataset.t; renderResults(); saveState(); };
+ACT.tab = el => { S.tab = el.dataset.t; renderTopNav(); renderResults(); saveState(); };
 ACT.pick = el => { S.focus = el.dataset.key === S.focus ? null : el.dataset.key; renderResults(); const d = $('.detail'); if (d && S.focus) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); saveState(); };
 ACT.unpick = () => { S.focus = null; renderResults(); };
 ACT.fit = () => { S.fit = true; update(); };
@@ -5099,6 +5573,8 @@ function tabAdvisor(){
   } catch(e){ console.error('advisor section', sec, e); body = '<div class="empty"><h3>Something went wrong drawing this section</h3><p>' + esc(e.message) + '</p></div>'; }
   return nav + '<div class="advbody" id="advbody">' + body + '</div>';
 }
+/* how far the sticky tab bar at the top of the page covers, so a manual scroll doesn't tuck content under it */
+const navOffset = () => { const n = $('#topnav'); return (n ? n.offsetHeight : 0) + 8; };
 ACT.advsec = el => { S.adv.sec = el.dataset.sec; renderResults(); saveState(); const b = $('.advnav'); if (b && b.scrollIntoView) b.scrollIntoView({ block: 'nearest' }); };
 ACT.advgo = el => {
   const d = el.dataset;
@@ -5106,7 +5582,7 @@ ACT.advgo = el => {
   if (d.sec) S.adv.sec = d.sec;
   renderResults(); saveState();
   if (d.focus){ const t = document.getElementById('adv-' + d.focus); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
-  else window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - 8), behavior: 'smooth' });
+  else window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - navOffset()), behavior: 'smooth' });
 };
 
 /* =============== THIS WEEK =============== */
@@ -5201,7 +5677,7 @@ BIND.smart = (el, v) => { S.smart = !!v; update(); };
 ACT.advdismiss = el => { S.adv.dismissed[el.dataset.id] = 1; update(); };
 ACT.advrestore = () => { S.adv.dismissed = {}; update(); };
 ACT.advtech = el => { ADVUI.openTech = el.dataset.id; ADVUI.techCat = ''; S.adv.sec = 'techniques'; renderResults(); saveState(); const t = document.getElementById('tech-' + el.dataset.id); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'start' }); };
-ACT.advguide = el => { ADVUI.guide = el.dataset.crop; S.adv.sec = 'guide'; renderResults(); saveState(); window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - 8) }); };
+ACT.advguide = el => { ADVUI.guide = el.dataset.crop; S.adv.sec = 'guide'; renderResults(); saveState(); window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - navOffset()) }); };
 
 /* small helpers shared by the sections below */
 function cropOptions(cur){
@@ -5551,6 +6027,270 @@ ACT.icsdl = () => {
   a.href = URL.createObjectURL(blob); a.download = (S.name || 'garden').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() + '-garden.ics';
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
 };
+
+/* ============================================================
+   UI SYNC — the Sync button, sign-in with Google, the Sync dialog, timers
+   ============================================================ */
+const syncCid = () => ((window.TGP_CONFIG && window.TGP_CONFIG.googleClientId) || lsGet(SYNC_CID_KEY) || '').trim();
+let LAST_TYPED = 0;
+['input', 'keydown'].forEach(ev => document.addEventListener(ev, () => { LAST_TYPED = Date.now(); }, true));
+
+/* only swap in changes from the cloud when you're not halfway through typing or dragging */
+function syncCanApply(){
+  if (typeof SITE !== 'undefined' && SITE.drag) return false;
+  return Date.now() - LAST_TYPED > 2500;
+}
+function syncApplied(){
+  S = curGarden();
+  try { refreshLive(false); } catch(e){}
+  update();
+}
+
+/* ---------- Google sign-in (loaded only once someone turns sync on) ---------- */
+function gisReady(){ return !!(window.google && google.accounts && google.accounts.oauth2); }
+let _gisP = null;
+function loadGis(){
+  if (gisReady()) return Promise.resolve();
+  if (_gisP) return _gisP;
+  _gisP = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    s.onload = () => res(); s.onerror = () => { _gisP = null; s.remove(); rej(new SyncErr('net', 'Couldn’t reach Google. Check your connection.')); };
+    document.head.appendChild(s);
+    setTimeout(() => { if (!gisReady()){ _gisP = null; rej(new SyncErr('net', 'Google sign-in didn’t load.')); } }, 20000);
+  });
+  return _gisP;
+}
+/* must be called straight from a tap so the browser lets the sign-in window open */
+function requestToken(){
+  return new Promise((resolve, reject) => {
+    let done = false; const fin = (fn, v) => { if (!done){ done = true; fn(v); } };
+    if (!gisReady()) return reject(new SyncErr('net', 'Google sign-in isn’t loaded yet. Tap again in a moment.'));
+    try {
+      const tc = google.accounts.oauth2.initTokenClient({
+        client_id: syncCid(), scope: SYNC_SCOPE,
+        callback: r => {
+          if (!r || r.error) return fin(reject, new SyncErr('denied', (r && (r.error_description || r.error)) || 'Sign-in failed.'));
+          if (r.scope && r.scope.indexOf('drive.appdata') < 0) return fin(reject, new SyncErr('scope', 'Sync needs the “app data” permission. Tick it on Google’s screen and try again.'));
+          setToken(r.access_token, +r.expires_in || 3600); fin(resolve);
+        },
+        error_callback: e => fin(reject, new SyncErr(e && e.type === 'popup_closed' ? 'closed' : 'popup', e && e.type === 'popup_closed' ? 'Sign-in was cancelled.' : 'Your browser blocked the Google sign-in window. Allow pop-ups for this site and tap again.'))
+      });
+      tc.requestAccessToken(SYNC.email ? { hint: SYNC.email } : {});
+    } catch(e){ fin(reject, new SyncErr('denied', 'Google sign-in failed: ' + (e && e.message))); }
+    setTimeout(() => fin(reject, new SyncErr('closed', 'Sign-in timed out.')), 240000);
+  });
+}
+async function fetchEmail(){
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + TOK.t } });
+    if (r.ok){ const j = await r.json(); return (j.email || '').toLowerCase(); }
+  } catch(e){}
+  return '';
+}
+
+/* ---------- the button at the top ---------- */
+const CLOUD_SVG = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.6 4.7 4.7 0 0 1 17 18H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+function ago(t){
+  if (!t) return 'not yet';
+  const s = Math.max(0, Math.round((Date.now() - t) / 1000));
+  if (s < 45) return 'just now'; if (s < 3600) return Math.round(s / 60) + ' min ago';
+  if (s < 86400) return Math.round(s / 3600) + ' h ago'; return Math.round(s / 86400) + ' d ago';
+}
+function syncWords(){
+  const st = SYNC.state;
+  if (!SYNC.on) return { chip: 'Sync', cls: 'off', label: 'Sync your gardens between devices' };
+  if (st === 'syncing') return { chip: 'Syncing…', cls: 'busy', label: 'Syncing' };
+  if (st === 'auth') return { chip: 'Reconnect', cls: 'warn', label: 'Sync is paused. Tap to sign in again.' };
+  if (st === 'offline') return { chip: 'Sync paused', cls: 'warn', label: 'Sync is paused: no connection' };
+  if (st === 'error') return { chip: 'Sync problem', cls: 'err', label: 'Sync problem' };
+  if (st === 'ok') return { chip: 'Synced', cls: 'ok', label: 'Synced ' + ago(SYNC.last) };
+  return { chip: 'Sync', cls: 'busy', label: 'Sync is on' };
+}
+function renderSyncChip(){
+  const b = $('#syncChip'); if (!b) return;
+  const w = syncWords();
+  b.className = 'syncchip ' + w.cls; b.innerHTML = '<span class="sdot"></span>' + CLOUD_SVG + '<span class="stxt">' + esc(w.chip) + '</span>';
+  b.title = w.label; b.setAttribute('aria-label', w.label);
+}
+function syncRender(){
+  renderSyncChip();
+  const body = $('#syncbody'); if (body && $('#dlg') && $('#dlg').open) body.innerHTML = syncBodyHtml();
+}
+ACT.syncchip = () => {
+  if (SYNC.on && SYNC.state === 'auth'){ return syncReconnect(); }
+  ACT.syncopen();
+};
+
+/* ---------- the dialog ---------- */
+let SYNC_DLG_MSG = '', PENDING_EMAIL = '';
+function syncBodyHtml(){
+  const cid = syncCid();
+  if (PENDING_EMAIL) return switchHtml();
+  if (!SYNC.on){
+    return '<p class="muted">Sign in with Google and your gardens follow you to your phone, laptop or any other device. Everything stays yours:</p>' +
+      '<ul class="notes"><li><b>Private.</b> Your gardens are saved in a hidden folder in <em>your own</em> Google Drive that only this planner can open. Nobody else can see them, including whoever runs this site.</li>' +
+      '<li><b>Separate.</b> Each person signs in with their own Google account, so a friend’s gardens never mix with yours. Sharing a garden still works with a link or file, and gives the other person their own copy.</li>' +
+      '<li><b>Still works offline.</b> Gardens are also kept on this device, so nothing waits on the internet. Changes are merged when you’re back online.</li></ul>' +
+      (cid ? '<div class="row wrap" style="margin-top:.7rem"><button type="button" class="btn primary" data-act="syncsignin">Sign in with Google</button></div>' +
+        '<p class="hint">This loads Google’s sign-in from accounts.google.com and asks for permission to a private app-data folder in your Drive, plus your email address (to show which account is signed in). It can’t see any of your other files.</p>'
+        : '<div class="card warnbox"><b>Sync isn’t switched on for this site yet.</b><p class="hint" style="margin:.3rem 0 .5rem">Whoever hosts the planner needs to add a free Google “client ID” once (the README has the steps). If you host your own copy, paste it here to try it:</p>' +
+          '<div class="row"><input id="sync-cid" type="text" placeholder="1234567890-abc….apps.googleusercontent.com" autocomplete="off" spellcheck="false" value="' + esc(lsGet(SYNC_CID_KEY) || '') + '"><button type="button" class="btn" data-act="synccid">Save</button></div></div>') +
+      '<p id="syncmsg" class="hint" role="status">' + esc(SYNC_DLG_MSG) + '</p>';
+  }
+  const w = syncWords(), bak = jget(SYNC_BAK_KEY);
+  return '<div class="syncstat ' + w.cls + '"><span class="sdot"></span><b>' + esc(w.cls === 'ok' ? 'Up to date' : w.cls === 'busy' ? 'Syncing…' : w.cls === 'warn' && SYNC.state === 'auth' ? 'Sign in again to sync' : w.cls === 'warn' ? 'Paused (no connection)' : 'Needs attention') + '</b>' +
+    '<span class="muted"> · last synced ' + esc(ago(SYNC.last)) + '</span></div>' +
+    '<p>Signed in as <b>' + esc(SYNC.email || 'your Google account') + '</b>. Your gardens are saved in a private folder in that account’s Google Drive.</p>' +
+    (SYNC.msg ? '<p class="hint warn" role="alert">' + esc(SYNC.msg) + '</p>' : '') + (SYNC.note ? '<p class="hint warn">' + esc(SYNC.note) + '</p>' : '') +
+    '<div class="row wrap">' +
+      (SYNC.state === 'auth' ? '<button type="button" class="btn primary" data-act="syncreconnect">Sign in again</button>' : '<button type="button" class="btn primary" data-act="syncnow"' + (SYNC.busy ? ' disabled' : '') + '>Sync now</button>') +
+      '<button type="button" class="btn" data-act="syncout">Sign out on this device</button></div>' +
+    '<p class="hint">Changes save on this device first, then sync a few seconds later. Google keeps a website signed in for about an hour at a time, so when you come back to the planner you may need to tap <b>Reconnect</b> at the top once.</p>' +
+    '<details class="fold"><summary>More options</summary><div class="syncmore">' +
+      '<p class="hint">Signing out keeps your gardens on this device and stops syncing. Signing in again later picks up where it left off.</p>' +
+      '<div class="row wrap"><button type="button" class="btn" data-act="syncoutclear">Sign out and clear this device</button>' +
+      (bak ? '<button type="button" class="btn" data-act="syncrestore">Undo the last sync’s changes here</button>' : '') + '</div>' +
+      '<p class="hint">“Clear this device” is for a shared or borrowed device: it downloads a backup file, then removes the gardens from this browser. Your Drive copy stays.' + (bak ? ' “Undo” puts this browser back the way it was just before the last sync that changed it (' + esc(ago(bak.t)) + '), then syncs that.' : '') + '</p>' +
+      '<div class="row wrap"><button type="button" class="btn danger" data-act="syncdelcloud">Turn off sync and delete my cloud copy</button></div>' +
+      '<p class="hint">Deletes every synced file from your Drive’s private folder. Gardens on your devices are not touched. Other devices that are still signed in will upload their copy again, so sign them out too if you want it gone.</p></div></details>' +
+    '<p id="syncmsg" class="hint" role="status">' + esc(SYNC_DLG_MSG) + '</p>';
+}
+function switchHtml(){
+  return '<div class="card warnbox"><b>This browser already has gardens from another account.</b>' +
+    '<p style="margin:.4rem 0">The gardens here were synced with <b>' + esc(SYNC.owner) + '</b>, and you’ve just signed in as <b>' + esc(PENDING_EMAIL) + '</b>. What should happen to them?</p>' +
+    '<div class="row wrap"><button type="button" class="btn primary" data-act="syncswitchadd">Add them to ' + esc(PENDING_EMAIL) + '’s account</button>' +
+    '<button type="button" class="btn" data-act="syncswitchfresh">Keep them separate</button></div>' +
+    '<p class="hint">“Keep them separate” downloads a backup file of the gardens on this browser, clears them, and starts fresh with only ' + esc(PENDING_EMAIL) + '’s gardens.</p>' +
+    '<div class="row"><button type="button" class="btn" data-act="syncswitchcancel">Cancel</button></div></div>';
+}
+function syncDlgHtml(){
+  return '<div class="card-h"><h2>Sync your gardens</h2><button type="button" class="btn ic x" data-act="dlgclose" aria-label="Close">×</button></div><div id="syncbody">' + syncBodyHtml() + '</div>' +
+    '<div class="row end"><button type="button" class="btn" data-act="dlgclose">Close</button></div>';
+}
+ACT.syncopen = () => { SYNC_DLG_MSG = ''; PENDING_EMAIL = ''; openDlg(syncDlgHtml()); if (syncCid()) loadGis().catch(() => {}); };
+const syncMsg = t => { SYNC_DLG_MSG = t; const m = $('#syncmsg'); if (m) m.textContent = t; };
+ACT.synccid = () => {
+  const v = ($('#sync-cid') || {}).value || '';
+  if (v.trim() && !/^[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com$/i.test(v.trim())){ syncMsg('That doesn’t look like a Google client ID. It ends in .apps.googleusercontent.com.'); return; }
+  if (v.trim()) lsSet(SYNC_CID_KEY, v.trim()); else lsDel(SYNC_CID_KEY);
+  SYNC_DLG_MSG = v.trim() ? 'Saved.' : ''; syncRender(); if (syncCid()) loadGis().catch(() => {});
+};
+
+/* ---------- signing in and out ---------- */
+function syncFail(e){
+  const m = e instanceof SyncErr ? e.msg || e.kind : (e && e.message) || 'Something went wrong.';
+  if (e instanceof SyncErr && e.kind === 'closed') return syncMsg(m);
+  syncMsg(m);
+}
+ACT.syncsignin = async () => {
+  if (!syncCid()) return;
+  syncMsg('Opening Google sign-in…');
+  try {
+    if (!gisReady()) await loadGis();
+    await requestToken();
+    const email = await fetchEmail();
+    if (!email){ dropToken(); syncMsg('Couldn’t confirm which Google account that was. Check your connection and try again.'); return; }
+    if (SYNC.owner && SYNC.owner !== email){
+      if (isPristine()){ resetBase(); }
+      else { PENDING_EMAIL = email; syncRender(); return; }
+    }
+    syncFinishConnect(email);
+  } catch(e){ syncFail(e); }
+};
+function syncFinishConnect(email){
+  SYNC.on = true; SYNC.email = email || SYNC.email; SYNC.owner = email || SYNC.owner || 'this account'; PENDING_EMAIL = '';
+  saveSync(); SYNC_DLG_MSG = ''; SYNC.state = 'idle'; syncRender(); ensurePolling();
+  syncNow('connect').then(() => {
+    if (SYNC.state === 'ok'){
+      const o = SYNC.lastOut || {};
+      SYNC_DLG_MSG = o.pulled ? 'Signed in. Brought in ' + o.pulled + (o.pulled === 1 ? ' garden' : ' gardens') + ' from your Drive.' : 'Signed in. Your gardens are backed up and will stay in step.';
+      syncRender();
+    }
+  });
+}
+ACT.syncswitchadd = () => { const e = PENDING_EMAIL; resetBase(); STORE.tomb = {}; syncFinishConnect(e); };
+ACT.syncswitchfresh = () => {
+  const e = PENDING_EMAIL;
+  try { downloadJson('gardens-on-this-device-' + isoToday() + '.json', exportAll()); } catch(err){}
+  wipeLocal(); resetBase(); syncFinishConnect(e);
+};
+ACT.syncswitchcancel = () => { PENDING_EMAIL = ''; dropToken(); syncRender(); };
+async function syncReconnect(){
+  try {
+    if (!gisReady()) await loadGis();
+    await requestToken();
+    const email = await fetchEmail();
+    if (!email){ dropToken(); ACT.syncopen(); syncMsg('Couldn’t confirm which Google account that was. Check your connection and try again.'); return; }
+    if (SYNC.email && email !== SYNC.email){ dropToken(); ACT.syncopen(); syncMsg('You signed in as ' + email + ', but this device is syncing with ' + SYNC.email + '. Sign out first to switch accounts.'); return; }
+    SYNC.state = 'idle'; SYNC.msg = ''; syncRender(); syncNow('reconnect');
+  } catch(e){
+    ACT.syncopen(); syncFail(e);
+  }
+}
+ACT.syncreconnect = syncReconnect;
+ACT.syncnow = () => { SYNC_DLG_MSG = ''; syncNow('manual'); };
+ACT.syncout = () => {
+  SYNC.on = false; SYNC.state = 'off'; SYNC.msg = ''; dropToken(); saveSync(); stopPolling();
+  SYNC_DLG_MSG = 'Signed out. Your gardens are still on this device.'; syncRender();
+};
+function wipeLocal(){
+  Object.keys(STORE.gardens).forEach(id => { try { localStorage.removeItem(BG_PREFIX + id); } catch(e){} delete BG[id]; });
+  const g = newGarden('My garden'); g.entries = starterEntries();
+  STORE = { v: 2, cur: g.id, order: [g.id], gardens: { [g.id]: g }, custom: [], overrides: {}, tomb: {} };
+  Object.keys(LASTH).forEach(k => delete LASTH[k]);
+  syncInit(); rebuildCrops(); S = curGarden(); lsDel(SYNC_BAK_KEY); update();
+}
+ACT.syncoutclear = () => {
+  if (!confirm('Download a backup, then remove every garden from this browser? Your Google Drive copy stays, and you can sign in again to bring it back.')) return;
+  try { downloadJson('gardens-on-this-device-' + isoToday() + '.json', exportAll()); } catch(e){}
+  SYNC.on = false; SYNC.state = 'off'; SYNC.owner = ''; SYNC.email = ''; dropToken(); stopPolling(); resetBase(); saveSync(); wipeLocal();
+  SYNC_DLG_MSG = 'Signed out and cleared. A backup file was downloaded.'; syncRender();
+};
+ACT.syncrestore = () => {
+  const bak = jget(SYNC_BAK_KEY); if (!bak || !bak.store) return;
+  if (!confirm('Put this browser back the way it was ' + ago(bak.t) + ', just before the last sync that changed it? That version will then sync to your other devices too.')) return;
+  const cur = STORE.cur;
+  Object.keys(STORE.gardens).forEach(id => { if (!bak.store.gardens[id]){ try { localStorage.removeItem(BG_PREFIX + id); } catch(e){} } });
+  STORE = bak.store; STORE.tomb = STORE.tomb || {}; STORE.custom = STORE.custom || []; STORE.overrides = STORE.overrides || {};
+  Object.keys(STORE.gardens).forEach(k => fillGarden(STORE.gardens[k]));
+  if (!STORE.gardens[STORE.cur]) STORE.cur = STORE.gardens[cur] ? cur : STORE.order[0];
+  rebuildCrops(); S = curGarden(); lsDel(SYNC_BAK_KEY); update(); syncSoon(1500);
+  SYNC_DLG_MSG = 'Restored.'; syncRender();
+};
+ACT.syncdelcloud = async () => {
+  if (!confirm('Delete your synced copy from Google Drive and turn sync off? The gardens on your devices stay as they are.')) return;
+  if (!tokenOk()){ syncMsg('Sign in again first (tap “Sign in again”), then delete.'); return; }
+  syncMsg('Deleting…');
+  try {
+    SYNC.on = false; clearTimeout(_syncTimer);                                  /* stop new rounds, let a running one finish */
+    for (let i = 0; i < 100 && SYNC.busy; i++) await sleep(200);
+    const files = await driveList(); for (const f of files) await driveDel(f.id);
+    SYNC.state = 'off'; dropToken(); stopPolling(); resetBase(); saveSync(); STORE.tomb = {};
+    SYNC_DLG_MSG = 'Deleted ' + files.length + (files.length === 1 ? ' file' : ' files') + ' from your Drive. Sync is off.'; syncRender();
+  } catch(e){ SYNC.on = true; syncFail(e); }
+};
+
+/* ---------- keep going in the background ---------- */
+function ensurePolling(){
+  if (_pollTimer) return;
+  _pollTimer = setInterval(() => { if (SYNC.on && !document.hidden && SYNC.state !== 'auth') syncNow('poll'); renderSyncChip(); const b = $('#syncbody'); if (b && $('#dlg').open && !SYNC.busy) b.innerHTML = syncBodyHtml(); }, 90000);
+}
+function stopPolling(){ clearInterval(_pollTimer); _pollTimer = null; }
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden){ flushStore(); return; }
+  if (SYNC.on && Date.now() - SYNC.last > 30000) syncNow('focus');
+});
+window.addEventListener('pagehide', () => flushStore());
+window.addEventListener('online', () => { if (SYNC.on && (SYNC.state === 'offline' || SYNC.state === 'error')) syncNow('online'); });
+
+/* ---------- boot ---------- */
+syncInit();
+renderSyncChip();
+if (SYNC.on){
+  ensurePolling();
+  if (syncCid()) loadGis().catch(() => {});
+  if (tokenOk()) syncSoon(1200); else { SYNC.state = 'auth'; renderSyncChip(); }
+}
 
 </script>
 <script>

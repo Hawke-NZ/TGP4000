@@ -59,22 +59,28 @@ function loadStore(){
     const raw = localStorage.getItem(STORE_KEY);
     if (raw){
       const o = JSON.parse(raw);
-      if (o && o.v === 2 && o.gardens && o.order && o.order.length){ o.custom = o.custom || []; o.overrides = o.overrides || {}; Object.keys(o.gardens).forEach(k => fillGarden(o.gardens[k])); return o; }
+      if (o && o.v === 2 && o.gardens && o.order && o.order.length){ o.custom = o.custom || []; o.overrides = o.overrides || {}; o.tomb = o.tomb || {}; Object.keys(o.gardens).forEach(k => fillGarden(o.gardens[k])); return o; }
     }
   } catch(e){}
   let g = null;
   try { const raw1 = localStorage.getItem(V1_KEY); if (raw1) g = migrateV1(JSON.parse(raw1)); } catch(e){}
   if (!g){ g = newGarden('My garden'); g.entries = starterEntries(); }
-  return { v: 2, cur: g.id, order: [g.id], gardens: { [g.id]: g }, custom: [], overrides: {} };
+  return { v: 2, cur: g.id, order: [g.id], gardens: { [g.id]: g }, custom: [], overrides: {}, tomb: {} };
 }
 let _saveTimer = null;
+function writeStore(){
+  _saveTimer = null;
+  try { if (typeof syncStamp === 'function') syncStamp(); } catch(e){}      /* note which gardens changed (for cloud sync) */
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(STORE)); STORE_ERR = null; }
+  catch(e){ STORE_ERR = 'This browser wouldn’t save your changes (storage full or blocked). Use Share → Export to keep a copy.'; }
+  try { if (typeof syncNotify === 'function') syncNotify(); } catch(e){}
+}
 function saveStore(){
   clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(STORE)); STORE_ERR = null; }
-    catch(e){ STORE_ERR = 'This browser wouldn’t save your changes (storage full or blocked). Use Share → Export to keep a copy.'; }
-  }, 250);
+  _saveTimer = setTimeout(writeStore, 250);
 }
+/* write straight away (used before a cloud sync and when the page is closing) */
+function flushStore(){ if (_saveTimer){ clearTimeout(_saveTimer); writeStore(); } }
 
 /* ---------- photos ---------- */
 const BG = {};
@@ -140,6 +146,7 @@ function duplicateGarden(id, keepLogs){
 function deleteGarden(id){
   if (STORE.order.length < 2) return false;
   delete STORE.gardens[id]; STORE.order = STORE.order.filter(x => x !== id);
+  (STORE.tomb = STORE.tomb || {})[id] = Date.now();                       /* so the deletion reaches your other devices */
   try { localStorage.removeItem(BG_PREFIX + id); } catch(e){}
   delete BG[id];
   if (STORE.cur === id) STORE.cur = STORE.order[0];

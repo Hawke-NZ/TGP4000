@@ -36,6 +36,8 @@ function tabAdvisor(){
   } catch(e){ console.error('advisor section', sec, e); body = '<div class="empty"><h3>Something went wrong drawing this section</h3><p>' + esc(e.message) + '</p></div>'; }
   return nav + '<div class="advbody" id="advbody">' + body + '</div>';
 }
+/* how far the sticky tab bar at the top of the page covers, so a manual scroll doesn't tuck content under it */
+const navOffset = () => { const n = $('#topnav'); return (n ? n.offsetHeight : 0) + 8; };
 ACT.advsec = el => { S.adv.sec = el.dataset.sec; renderResults(); saveState(); const b = $('.advnav'); if (b && b.scrollIntoView) b.scrollIntoView({ block: 'nearest' }); };
 ACT.advgo = el => {
   const d = el.dataset;
@@ -43,7 +45,7 @@ ACT.advgo = el => {
   if (d.sec) S.adv.sec = d.sec;
   renderResults(); saveState();
   if (d.focus){ const t = document.getElementById('adv-' + d.focus); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
-  else window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - 8), behavior: 'smooth' });
+  else window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - navOffset()), behavior: 'smooth' });
 };
 
 /* =============== THIS WEEK =============== */
@@ -138,7 +140,7 @@ BIND.smart = (el, v) => { S.smart = !!v; update(); };
 ACT.advdismiss = el => { S.adv.dismissed[el.dataset.id] = 1; update(); };
 ACT.advrestore = () => { S.adv.dismissed = {}; update(); };
 ACT.advtech = el => { ADVUI.openTech = el.dataset.id; ADVUI.techCat = ''; S.adv.sec = 'techniques'; renderResults(); saveState(); const t = document.getElementById('tech-' + el.dataset.id); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'start' }); };
-ACT.advguide = el => { ADVUI.guide = el.dataset.crop; S.adv.sec = 'guide'; renderResults(); saveState(); window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - 8) }); };
+ACT.advguide = el => { ADVUI.guide = el.dataset.crop; S.adv.sec = 'guide'; renderResults(); saveState(); window.scrollTo({ top: Math.max(0, ($('#results') || document.body).getBoundingClientRect().top + window.scrollY - navOffset()) }); };
 
 /* small helpers shared by the sections below */
 function cropOptions(cur){
